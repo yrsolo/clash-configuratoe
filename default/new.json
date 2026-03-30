@@ -1,0 +1,778 @@
+{
+  "id": "",
+  "name": "NEW",
+  "description": "",
+  "nodes": [
+    {
+      "id": "d98e79c5-3f1b-4b8c-96e3-9765eea7cc34",
+      "label": "Global Settings",
+      "position": {
+        "x": -488.61058775120614,
+        "y": -139.42972757162818
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "globalSettings",
+      "settings": {
+        "sourceUpdateInterval": 3600,
+        "sourceHealthCheckInterval": 600,
+        "healthCheckUrl": "http://www.gstatic.com/generate_204",
+        "formatterUrl": "https://clash.solofarm.ru/api/formatter"
+      }
+    },
+    {
+      "id": "a4f9b54e-2577-47aa-bebe-a6b9fcbf5b67",
+      "label": "lib_json",
+      "position": {
+        "x": -465.69968121249826,
+        "y": 195.19240912905215
+      },
+      "enabled": false,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "proxyProvider",
+      "providerKey": "lib_auto",
+      "sourceType": "http",
+      "subscriptionUrl": "https://connliberty.com/connection/tunnel/23213932-1a03-4c0e-b80b-51ae3384edc7",
+      "resolverMode": "stub",
+      "interval": 3600,
+      "path": "./lib_auto.yaml",
+      "healthCheck": {
+        "enable": true,
+        "interval": 600,
+        "url": "http://www.gstatic.com/generate_204"
+      },
+      "formatter": {
+        "enabled": true
+      }
+    },
+    {
+      "id": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
+      "label": "Personal_HTTP",
+      "position": {
+        "x": -471.23702268833745,
+        "y": 314.68451181406493
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "manualProxy",
+      "proxy": {
+        "name": "Personal_HTTP",
+        "type": "http",
+        "server": "111.111.111.11",
+        "port": 8000,
+        "username": "",
+        "password": ""
+      }
+    },
+    {
+      "id": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "label": "AI_SERVICES",
+      "position": {
+        "x": 567.7852624967785,
+        "y": -198.6863118354889
+      },
+      "enabled": true,
+      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "kind": "proxyGroup",
+      "group": {
+        "name": "🤖 AI_SERVICES",
+        "includeDirect": true,
+        "autoSelect": false,
+        "catchAll": false,
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "label": "VIDEO_CONTENT",
+      "position": {
+        "x": 566.6654764020733,
+        "y": -12.778985587494425
+      },
+      "enabled": true,
+      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "kind": "proxyGroup",
+      "group": {
+        "name": "📺 VIDEO_CONTENT",
+        "includeDirect": true,
+        "autoSelect": false,
+        "catchAll": false,
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "f6e41bdd-4535-4b8f-9897-72b69f211338",
+      "label": "TORRENTS",
+      "position": {
+        "x": 538.0226441433396,
+        "y": 349.6081986783747
+      },
+      "enabled": true,
+      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "kind": "proxyGroup",
+      "group": {
+        "name": "🏴‍☠️ TORRENTS",
+        "includeDirect": true,
+        "autoSelect": false,
+        "catchAll": false,
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "f48f0a86-98a9-49f1-8c56-8f6af5c56a0b",
+      "label": "TELEGA",
+      "position": {
+        "x": 549.916152517118,
+        "y": 182.85462466442945
+      },
+      "enabled": true,
+      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "kind": "proxyGroup",
+      "group": {
+        "name": "📢 TELEGA",
+        "includeDirect": false,
+        "autoSelect": true,
+        "catchAll": false,
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "c2021ded-75a3-4170-80de-863fc48893f0",
+      "label": "REST_OF_WORLD",
+      "position": {
+        "x": 521.8906124397279,
+        "y": 527.2990667754239
+      },
+      "enabled": true,
+      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "kind": "proxyGroup",
+      "group": {
+        "name": "🌍 REST_OF_WORLD",
+        "includeDirect": true,
+        "autoSelect": false,
+        "catchAll": true,
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "8bba89c1-f744-43b4-b761-181aa5dd1c26",
+      "label": "YandexD+local",
+      "position": {
+        "x": 1179.3193018784607,
+        "y": 801.7435003848672
+      },
+      "enabled": true,
+      "canvasGroupId": "dc3b84f8-fc4c-4b04-88e9-efc1e3156fbf",
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "processNames",
+          "ipCidrs"
+        ],
+        "name": "YandexD+local",
+        "first": true,
+        "domains": [],
+        "domainSuffixes": [
+          "yandex.ru",
+          "yandex.net",
+          "yadi.sk",
+          "local"
+        ],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [
+          "YandexDisk.exe"
+        ],
+        "ipCidrs": [
+          "127.0.0.0/8"
+        ],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "b10624f1-9860-4a23-9d3b-cf8c813cc23a",
+      "label": "🤖 AI_SERVICES",
+      "position": {
+        "x": 1122.3574276527331,
+        "y": -103.96523311897099
+      },
+      "enabled": true,
+      "canvasGroupId": "a8754dd4-96ae-4d93-86db-f75a860f0f6b",
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes"
+        ],
+        "name": "🤖 AI_SERVICES",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [
+          "openai.com",
+          "gemini.google.com",
+          "claude.ai",
+          "claude.com",
+          "chatgpt.com",
+          "stitch.withgoogle.com",
+          "notebooklm.google.com",
+          "pencil.dev",
+          "penpot.app"
+        ],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "a49c3d9a-1fd2-473d-8127-50c7ce652204",
+      "label": "📢 TELEGA",
+      "position": {
+        "x": 1115.4707078995255,
+        "y": 335.4736704283455
+      },
+      "enabled": true,
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "geosites",
+          "geoips",
+          "processNames",
+          "rawRules"
+        ],
+        "name": "📢 TELEGA",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [
+          "telegram.org",
+          "t.me",
+          "telegram.me",
+          "tx.me",
+          "telegram.org",
+          "telegram.com",
+          "t.me"
+        ],
+        "domainKeywords": [],
+        "geosites": [
+          "telegram"
+        ],
+        "geoips": [
+          "telegram"
+        ],
+        "processNames": [
+          "Telegram.exe",
+          "telegram-desktop.exe",
+          "tdata.exe",
+          "org.telegram.messenger"
+        ],
+        "ipCidrs": [],
+        "rawRules": [
+          "IP-ASN,62041,📢 TELEGA",
+          "IP-ASN,59930,📢 TELEGA",
+          "IP-ASN,44907,📢 TELEGA",
+          "IP-ASN,211157,📢 TELEGA"
+        ],
+        "match": false
+      }
+    },
+    {
+      "id": "18e201d3-9e10-4128-af51-9cf892f030b5",
+      "label": "FB+INST",
+      "position": {
+        "x": 1258.7292859272368,
+        "y": 119.21972589006558
+      },
+      "enabled": true,
+      "canvasGroupId": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "geosites",
+          "geoips",
+          "processNames",
+          "rawRules"
+        ],
+        "name": "FB+INST",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [
+          "instagram.com",
+          "cdninstagram.com",
+          "threads.net",
+          "facebook.com",
+          "facebook.net",
+          "fbcdn.net",
+          "fbsbx.com",
+          "instagram.com",
+          "cdninstagram.com",
+          "facebook.com",
+          "fb.com",
+          "fbcdn.net",
+          "fbsbx.com",
+          "meta.com",
+          "x.com"
+        ],
+        "domainKeywords": [],
+        "geosites": [
+          "instagram",
+          "facebook"
+        ],
+        "geoips": [
+          "facebook"
+        ],
+        "processNames": [
+          "com.instagram.android",
+          "com.instagram.barcelona",
+          "com.facebook.katana",
+          "com.whatsapp",
+          "Instagram.exe",
+          "Facebook.exe",
+          "Messenger.exe"
+        ],
+        "ipCidrs": [],
+        "rawRules": [
+          "IP-ASN,32934,📺 VIDEO_CONTENT",
+          "IP-ASN,63293,📺 VIDEO_CONTENT",
+          "IP-ASN,54115,📺 VIDEO_CONTENT"
+        ],
+        "match": false
+      }
+    },
+    {
+      "id": "6f7fa62d-a168-4f6a-889c-1cef5a6354ec",
+      "label": "🏴‍☠️ TORRENTS",
+      "position": {
+        "x": 1108.9626637570952,
+        "y": 488.1034635575521
+      },
+      "enabled": true,
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "processNames"
+        ],
+        "name": "🏴‍☠️ TORRENTS",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [
+          "rutracker.org"
+        ],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "34015a7c-913b-46cd-a0d2-16ac792e6e8c",
+      "label": "🌍 REST_OF_WORLD",
+      "position": {
+        "x": 1117.7101835290755,
+        "y": 624.2066611133041
+      },
+      "enabled": true,
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "match"
+        ],
+        "name": "🌍 REST_OF_WORLD",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "c7eb0822-0a3d-45dd-98b3-593085ad5c27",
+      "label": "DIR",
+      "position": {
+        "x": 539.9222083719164,
+        "y": 715.7674477815833
+      },
+      "enabled": true,
+      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "kind": "proxyGroup",
+      "group": {
+        "name": "DIR",
+        "includeDirect": true,
+        "autoSelect": false,
+        "catchAll": false,
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "b98c9675-88de-4886-81ed-43a74f8e2790",
+      "label": "Merge",
+      "position": {
+        "x": -74.56903008269484,
+        "y": 362.3276111046703
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "sourceMerge",
+      "merge": {
+        "strategy": "combine",
+        "filterEnabled": false,
+        "filterTerms": [],
+        "invert": false
+      }
+    },
+    {
+      "id": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
+      "label": "RU",
+      "position": {
+        "x": -83.79201250156149,
+        "y": 231.2426193593647
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "sourceMerge",
+      "merge": {
+        "strategy": "combine",
+        "filterEnabled": true,
+        "filterTerms": [
+          "Россия",
+          "Russia",
+          "RU"
+        ],
+        "invert": true
+      }
+    },
+    {
+      "id": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
+      "label": "NATO+prox",
+      "position": {
+        "x": -61.18576318379493,
+        "y": -17.750099450865264
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "sourceMerge",
+      "merge": {
+        "strategy": "combine",
+        "filterEnabled": true,
+        "filterTerms": [
+          "Россия",
+          "Russia",
+          "RU"
+        ],
+        "invert": false
+      }
+    },
+    {
+      "id": "32f951ee-60a5-43b3-826e-b8ec0a2d161c",
+      "label": "📺 VIDEO_CONTENT",
+      "position": {
+        "x": 1107.9809010783465,
+        "y": 194.43217934314035
+      },
+      "enabled": true,
+      "canvasGroupId": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
+      "kind": "ruleSet",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "geosites",
+          "geoips",
+          "processNames",
+          "rawRules"
+        ],
+        "name": "📺 VIDEO_CONTENT",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [
+          "googlevideo.com",
+          "youtube.com",
+          "music.youtube.com"
+        ],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "bc8afd89-7c52-4a7c-9e63-21928b0b0da1",
+      "label": "NATO",
+      "position": {
+        "x": -61.017300779886085,
+        "y": 96.0698036738275
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "sourceMerge",
+      "merge": {
+        "strategy": "combine",
+        "filterEnabled": true,
+        "filterTerms": [
+          "Россия",
+          "Russia",
+          "RU"
+        ],
+        "invert": false
+      }
+    },
+    {
+      "id": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
+      "label": "VLESS",
+      "position": {
+        "x": -463.9930041512582,
+        "y": 68.93824788832774
+      },
+      "enabled": true,
+      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "kind": "proxyProvider",
+      "providerKey": "vless",
+      "sourceType": "http",
+      "subscriptionUrl": "https://workspace.invalid/subscription",
+      "resolverMode": "stub",
+      "interval": 3600,
+      "path": "./lib_auto.yaml",
+      "healthCheck": {
+        "enable": true,
+        "interval": 600,
+        "url": "http://www.gstatic.com/generate_204"
+      },
+      "formatter": {
+        "enabled": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "553d79b0-255c-4c7a-9d98-95063d12a2f7",
+      "source": "b10624f1-9860-4a23-9d3b-cf8c813cc23a",
+      "target": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "d527f90b-4aac-42fd-b427-967a3fb2eb65",
+      "source": "a49c3d9a-1fd2-473d-8127-50c7ce652204",
+      "target": "f48f0a86-98a9-49f1-8c56-8f6af5c56a0b",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "2ed7d446-de45-4e40-ace1-978b265ebb9c",
+      "source": "18e201d3-9e10-4128-af51-9cf892f030b5",
+      "target": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "9878bda1-84ba-4f0b-82a2-368da19c2e94",
+      "source": "6f7fa62d-a168-4f6a-889c-1cef5a6354ec",
+      "target": "f6e41bdd-4535-4b8f-9897-72b69f211338",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "57d60c31-7c29-464e-a072-f0f7da94611e",
+      "source": "8bba89c1-f744-43b4-b761-181aa5dd1c26",
+      "target": "c7eb0822-0a3d-45dd-98b3-593085ad5c27",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "5b6b7fae-3a38-47ec-a3d6-20591b9d9415",
+      "source": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
+      "target": "b98c9675-88de-4886-81ed-43a74f8e2790",
+      "kind": "group-source"
+    },
+    {
+      "id": "a894ef31-4e70-4700-b066-984ad0135764",
+      "source": "a8754dd4-96ae-4d93-86db-f75a860f0f6b",
+      "target": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "0b6af405-57af-4a47-a542-40c2891f8ea9",
+      "source": "b98c9675-88de-4886-81ed-43a74f8e2790",
+      "target": "c2021ded-75a3-4170-80de-863fc48893f0",
+      "kind": "group-source"
+    },
+    {
+      "id": "f749a36b-9f06-4cf9-bfca-02ffed9c056c",
+      "source": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
+      "target": "f6e41bdd-4535-4b8f-9897-72b69f211338",
+      "kind": "group-source"
+    },
+    {
+      "id": "b7ae4dfa-15fe-421e-97ae-f4766b061b7f",
+      "source": "dc3b84f8-fc4c-4b04-88e9-efc1e3156fbf",
+      "target": "c7eb0822-0a3d-45dd-98b3-593085ad5c27",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "f19fb4b9-5ab9-464f-a2fc-d1011419675d",
+      "source": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
+      "target": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "kind": "ruleset-target"
+    },
+    {
+      "id": "f06bdfac-03ba-4f58-8f57-5812d7fb9faf",
+      "source": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
+      "target": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "kind": "group-source"
+    },
+    {
+      "id": "0b668a98-8bbb-4820-96e2-31fdc1f751eb",
+      "source": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
+      "target": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
+      "kind": "group-source"
+    },
+    {
+      "id": "25331c01-68e6-4a2a-9728-13b49fd39b7c",
+      "source": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
+      "target": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "kind": "group-source"
+    },
+    {
+      "id": "2f1cf4bd-5e29-422a-8143-f4d2c0c03345",
+      "source": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
+      "target": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
+      "kind": "group-source"
+    },
+    {
+      "id": "41f706d8-47a7-49b9-962d-b4fc2d495ba7",
+      "source": "bc8afd89-7c52-4a7c-9e63-21928b0b0da1",
+      "target": "f48f0a86-98a9-49f1-8c56-8f6af5c56a0b",
+      "kind": "group-source"
+    },
+    {
+      "id": "cdd17462-cb03-434b-bf7f-330307a66374",
+      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
+      "target": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
+      "kind": "group-source"
+    },
+    {
+      "id": "d5487386-ca0d-4178-a311-47678913a36d",
+      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
+      "target": "bc8afd89-7c52-4a7c-9e63-21928b0b0da1",
+      "kind": "group-source"
+    },
+    {
+      "id": "9997aab2-1019-42d2-9a35-d779b3da5ae5",
+      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
+      "target": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
+      "kind": "group-source"
+    },
+    {
+      "id": "926f13ce-f978-4d8b-9e3f-e1dc7cc7faf5",
+      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
+      "target": "b98c9675-88de-4886-81ed-43a74f8e2790",
+      "kind": "group-source"
+    },
+    {
+      "id": "5c51603d-b6ba-4af1-aabc-b93323eddaef",
+      "source": "34015a7c-913b-46cd-a0d2-16ac792e6e8c",
+      "target": "c2021ded-75a3-4170-80de-863fc48893f0",
+      "kind": "ruleset-target"
+    }
+  ],
+  "canvasGroups": [
+    {
+      "id": "a8754dd4-96ae-4d93-86db-f75a860f0f6b",
+      "label": "Rule Panel 1",
+      "enabled": true,
+      "role": "rulePanel",
+      "color": "#dbeafe",
+      "position": {
+        "x": 1112.3574276527331,
+        "y": -141.96523311897099
+      },
+      "size": {
+        "width": 260,
+        "height": 170
+      }
+    },
+    {
+      "id": "dc3b84f8-fc4c-4b04-88e9-efc1e3156fbf",
+      "label": "Rule Panel 2",
+      "enabled": true,
+      "role": "rulePanel",
+      "color": "#dbeafe",
+      "position": {
+        "x": 1169.3193018784607,
+        "y": 763.7435003848672
+      },
+      "size": {
+        "width": 260,
+        "height": 170
+      }
+    },
+    {
+      "id": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
+      "label": "Rule Panel 3",
+      "enabled": true,
+      "role": "rulePanel",
+      "color": "#dbeafe",
+      "position": {
+        "x": 1113.7568948416026,
+        "y": 46.16196197171908
+      },
+      "size": {
+        "width": 260,
+        "height": 170
+      }
+    },
+    {
+      "id": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "label": "Panel 4",
+      "enabled": true,
+      "role": "generic",
+      "color": "#dbeafe",
+      "position": {
+        "x": -601.751712770654,
+        "y": -248.2893283530696
+      },
+      "size": {
+        "width": 887,
+        "height": 802
+      }
+    },
+    {
+      "id": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "label": "Panel 5",
+      "enabled": true,
+      "role": "generic",
+      "color": "#dbeafe",
+      "position": {
+        "x": 479.11767690031877,
+        "y": -305.4477179637646
+      },
+      "size": {
+        "width": 446,
+        "height": 1239
+      }
+    }
+  ],
+  "meta": {
+    "version": 1,
+    "createdAt": "2026-03-29T14:38:44.208Z",
+    "updatedAt": "2026-03-30T15:12:14.587Z"
+  }
+}

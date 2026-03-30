@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clash-configuratoe.local/schema/config-project.schema.json",
+  "title": "ConfigProject",
+  "type": "object",
+  "required": ["id", "name", "nodes", "edges", "canvasGroups", "meta"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "position", "label"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": ["proxyProvider", "manualProxy", "proxyGroup", "ruleSet"]
+          },
+          "label": { "type": "string" },
+          "position": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "target", "kind"],
+        "properties": {
+          "id": { "type": "string" },
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": ["group-source", "ruleset-target"]
+          }
+        }
+      }
+    },
+    "canvasGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "position", "size"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    }
+  }
+}

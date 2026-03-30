@@ -1,0 +1,55 @@
+profile:
+  store-selected: true
+proxy-providers:
+  lib_auto:
+    type: http
+    url: "https://vless-extractor.yr-solo.workers.dev/?url=https%3A%2F%2Fconnliberty.com%2Fconnection%2Fsubs%2F23213932-1a03-4c0e-b80b-51ae3384edc7"
+    interval: 3600
+    path: ./lib_auto.yaml
+    health-check:
+      enable: true
+      interval: 600
+      url: "http://www.gstatic.com/generate_204"
+proxies:
+  - name: Personal_HTTP
+    type: http
+    server: 195.158.194.74
+    port: 8000
+    username: FHmgTs
+    password: RFBgtW
+proxy-groups:
+  - name: 🤖 AI_SERVICES
+    type: select
+    use:
+      - lib_auto
+    proxies:
+      - DIRECT
+      - Personal_HTTP
+  - name: 🌍 REST_OF_WORLD
+    type: select
+    proxies:
+      - DIRECT
+  - name: DIR
+    type: select
+    proxies:
+      - DIRECT
+rules:
+  - DOMAIN-SUFFIX,openai.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,claude.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,stitch.withgoogle.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,pencil.dev,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,penpot.app,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,openai.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,claude.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,stitch.withgoogle.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,pencil.dev,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,penpot.app,🤖 AI_SERVICES
+  - MATCH,🌍 REST_OF_WORLD

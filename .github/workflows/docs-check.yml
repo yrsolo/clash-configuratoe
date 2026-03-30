@@ -1,0 +1,25 @@
+name: Docs Check
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "AGENTS.md"
+      - "agent/**"
+      - ".codex/skills/**"
+      - "docs/**"
+      - "work/**"
+      - "scripts/docs-check.sh"
+      - "scripts/docs-check.mjs"
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: bash scripts/docs-check.sh

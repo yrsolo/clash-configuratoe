@@ -1,0 +1,23 @@
+{
+  "name": "clash-configuratoe",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/web",
+    "packages/schema"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @clash-configuratoe/web",
+    "build": "npm run build --workspace @clash-configuratoe/schema && npm run build --workspace @clash-configuratoe/web",
+    "test": "npm run build --workspace @clash-configuratoe/schema && npm run test --workspace @clash-configuratoe/schema && npm run test --workspace @clash-configuratoe/web",
+    "typecheck": "npm run typecheck --workspace @clash-configuratoe/schema && npm run typecheck --workspace @clash-configuratoe/web",
+    "docs-check": "node scripts/docs-check.mjs",
+    "release-check": "npm run docs-check && npm run typecheck && npm run test && npm run build",
+    "bootstrap": "npm install"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "playwright": "^1.58.2"
+  }
+}
