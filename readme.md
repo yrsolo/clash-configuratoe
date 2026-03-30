@@ -1,24 +1,62 @@
-сайт создатель конфигов для clash verge
-ghbvth конфига который надо создать [text](example/Merge.yaml)
+# clash-configuratoe
 
-навзоде человек вводит свои проекси сервверы и пути vless подписок на впн
+`clash-configuratoe` is a static-first visual builder for Clash Verge configurations. Users assemble proxy providers, manual proxies, proxy groups, and rule blocks on a node canvas, then publish a shareable YAML link and QR code.
 
-в результате делаеться сылка на ямл и куаркод и возможность сказать
+## What It Is
 
-интерфейс - удобный нодовой
+This repository contains the MVP foundation for a browser-based Clash configuration editor. The product uses a canonical JSON project format for editing and persistence, while generating Clash-compatible YAML as a derived artifact for export and sharing.
 
-есть вводныя нода
-нода правил
-нода групп прокси
+## Why It Exists
 
-соеденяя из соеденениями просто наглядно делаем схему которая нуна юзеру
+Editing large Clash configs by hand is slow, error-prone, and hard to explain to non-expert users. This project makes the configuration structure visible and editable through a graph UI, with presets for common routing scenarios such as AI services, Telegram, video, torrents, and a default rest-of-world path.
 
-в ноде правил может быть сразу несколько разных правил охедененных тематически
+## Core Capabilities
 
-подписка вставляется не напрямую а через коауд функцию которая преобразует влесс ссылку в ямл (эта функция уже есть, пример еёиспользлвания в экзампле )
+- Node-based editor for providers, proxies, groups, rules, and visual canvas panels
+- Canonical JSON project model with lossless editor metadata
+- Clash YAML export and best-effort Clash YAML import
+- Stable published YAML links for workspace projects, plus guest snapshot publish links and QR codes
+- Lightweight hash-based personal workspaces backed by a serverless storage bridge
+- Built-in starter presets and local draft autosave
 
-конфигурации можно сохранять на сторедже . в перспективе надо подумать о том как обезапасить ссылки , может через яндкс автоизацию. но на mvp беопасность делаем заглушкой и храним всё открыто
+## Quick Start
 
-в енв есть нужные серкеты, имя домена, бакет под деплой.
+```bash
+npm install
+npm run dev
+```
 
-важно что бы интерфейс был современный, быстрым, ноды таскались мышшкой, ноды можнео было группировать на визуальные панельки, надо найти для нод какую-то хорошу библиотеку
+Then open:
+
+- Web app: `http://localhost:5173`
+- Documentation map: [docs/README.md](/n:/PROJECTS/service/clash-configuratoe/docs/README.md)
+
+## Repository Structure
+
+- `apps/web` - Vite + React client application
+- `packages/schema` - domain types, presets, import/export logic, validation
+- `docs` - permanent project documentation
+- `work` - active task tracking and evidence
+- `agent` - operating contract, prompt notes, and policy files
+- `.codex/skills` - reusable procedural skills for docs, tracking, and checks
+- `serverless` - cloud-function bridge code used behind the same-origin gateway
+- `.github/workflows` - CI checks
+- `scripts` - bootstrap, docs, and release helpers
+
+## Documentation
+
+Start here:
+
+- [Documentation Map](/n:/PROJECTS/service/clash-configuratoe/docs/README.md)
+- [Product Overview](/n:/PROJECTS/service/clash-configuratoe/docs/overview/product.md)
+- [System Overview](/n:/PROJECTS/service/clash-configuratoe/docs/architecture/system-overview.md)
+
+## Agent Workflow
+
+- [AGENTS.md](/n:/PROJECTS/service/clash-configuratoe/AGENTS.md)
+- [Operating Contract](/n:/PROJECTS/service/clash-configuratoe/agent/OPERATING_CONTRACT.md)
+- [Current Task](/n:/PROJECTS/service/clash-configuratoe/work/now/current-task.md)
+
+## Status
+
+MVP foundation in progress. The repository now includes the starter architecture, domain schema, YAML import/export pipeline, a working node editor, and a live serverless bridge for workspace and publish persistence. Strong authentication and secret-backed subscription transformation still remain future hardening work.

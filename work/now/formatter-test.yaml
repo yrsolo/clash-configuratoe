@@ -1,0 +1,5 @@
+proxies:
+  - name: "Formatter Smoke"
+    type: socks5
+    server: 1.2.3.4
+    port: 1080

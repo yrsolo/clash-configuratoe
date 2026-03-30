@@ -1,0 +1,111 @@
+// Функция для безопасного парсинга VLESS-ссылок с поддержкой UTF-8
+function parseVlessToYaml(link) {
+  try {
+    let [main, namePart] = link.split('#');
+    // Декодируем имя сервера (флаги, русские буквы)
+    let name = namePart ? decodeURIComponent(namePart).trim() : 'Proxy_' + Math.floor(Math.random() * 1000);
+    
+    let withoutProto = main.replace('vless://', '');
+    let [uuid, rest] = withoutProto.split('@');
+    let [serverPort, query] = rest.split('?');
+    let [server, port] = serverPort.split(':');
+    let params = new URLSearchParams(query || '');
+
+    let yaml = `  - name: "${name}"\n`;
+    yaml += `    type: vless\n`;
+    yaml += `    server: ${server}\n`;
+    yaml += `    port: ${port}\n`;
+    yaml += `    uuid: ${uuid}\n`;
+    yaml += `    network: ${params.get('type') || 'tcp'}\n`;
+    yaml += `    udp: true\n`;
+
+    if (params.get('security') === 'reality') {
+        yaml += `    tls: true\n`;
+        if (params.get('sni')) yaml += `    servername: ${params.get('sni')}\n`;
+        if (params.get('fp')) yaml += `    client-fingerprint: ${params.get('fp')}\n`;
+        if (params.get('flow')) yaml += `    flow: ${params.get('flow')}\n`;
+        yaml += `    reality-opts:\n`;
+        yaml += `      public-key: ${params.get('pbk')}\n`;
+        if (params.get('sid')) yaml += `      short-id: ${params.get('sid')}\n`;
+    }
+    return yaml;
+  } catch (e) { return ''; }
+}
+
+export default {
+  async fetch(request) {
+    const urlParams = new URL(request.url).searchParams;
+    const targetUrl = urlParams.get('url');
+    if (!targetUrl) return new Response('Missing ?url=', { status: 400 });
+
+    try {
+      const res = await fetch(targetUrl, { headers: { 'User-Agent': 'v2rayN/6.33' } });
+      
+      // Читаем ответ как Buffer и декодируем строго в UTF-8
+      const buffer = await res.arrayBuffer();
+      let text = new TextDecoder('utf-8').decode(buffer);
+
+      if (urlParams.has('debug')) {
+          return new Response(text, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      }
+
+      let yamlOutput = 'proxies:\n';
+      let cleanText = text.replace(/&quot;/g, '"').trim();
+
+      // === РЕЖИМ 1: МАССИВ JSON (TUNNEL) ===
+      if (cleanText.startsWith('[') || cleanText.includes('"outbounds"')) {
+          try {
+              let jsonOnly = cleanText.substring(cleanText.indexOf('['), cleanText.lastIndexOf(']') + 1);
+              const configs = JSON.parse(jsonOnly);
+              
+              configs.forEach(config => {
+                  const vless = config.outbounds.find(o => o.protocol === 'vless');
+                  const socks = config.outbounds.find(o => o.protocol === 'socks' && o.tag === 'ru-upstream');
+                  const name = config.remarks ? config.remarks.trim() : 'Tunnel_' + Math.floor(Math.random() * 100);
+
+                  let dialerName = "";
+                  if (socks) {
+                      const s = socks.settings.servers[0];
+                      dialerName = `Upstream_${name}`;
+                      yamlOutput += `  - name: "${dialerName}"\n    type: socks5\n    server: ${s.address}\n    port: ${s.port}\n`;
+                      if (s.users) yamlOutput += `    username: "${s.users[0].user}"\n    password: "${s.users[0].pass}"\n`;
+                  }
+
+                  if (vless) {
+                      const v = vless.settings.vnext[0];
+                      const stream = vless.streamSettings;
+                      const reality = stream.realitySettings || {};
+                      yamlOutput += `  - name: "${name}"\n    type: vless\n    server: ${v.address}\n    port: ${v.port}\n    uuid: ${v.users[0].id}\n    network: ${stream.network || 'tcp'}\n    udp: true\n    tls: true\n`;
+                      if (reality.serverName) yamlOutput += `    servername: ${reality.serverName}\n`;
+                      if (reality.publicKey) yamlOutput += `    reality-opts:\n      public-key: ${reality.publicKey}\n`;
+                      if (reality.shortId) yamlOutput += `      short-id: ${reality.shortId}\n`;
+                      if (dialerName) yamlOutput += `    dialer-proxy: "${dialerName}"\n`;
+                  }
+              });
+              return new Response(yamlOutput, { headers: { 'Content-Type': 'text/yaml; charset=utf-8' } });
+          } catch (e) {}
+      }
+
+      // === РЕЖИМ 2: BASE64 ИЛИ VLESS:// ===
+      try {
+          if (!text.includes('vless://')) {
+              // Безопасное декодирование Base64 с UTF-8
+              const binary = atob(text.trim());
+              const bytes = new Uint8Array(binary.length);
+              for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+              text = new TextDecoder('utf-8').decode(bytes);
+          }
+      } catch (e) {}
+
+      const vlessMatches = text.match(/vless:\/\/[^\s"'<>]+/g) || [];
+      vlessMatches.forEach(link => {
+          yamlOutput += parseVlessToYaml(link.replace(/&amp;/g, '&'));
+      });
+
+      return new Response(yamlOutput, { headers: { 'Content-Type': 'text/yaml; charset=utf-8' } });
+
+    } catch (err) {
+      return new Response(`Error: ${err.message}`, { status: 500 });
+    }
+  }
+};

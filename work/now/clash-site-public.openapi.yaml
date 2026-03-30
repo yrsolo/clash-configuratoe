@@ -1,0 +1,197 @@
+openapi: 3.0.0
+info:
+  title: Clash Configuratoe Public Gateway
+  version: 1.0.0
+servers:
+  - url: https://clash.solofarm.ru
+paths:
+  /api/formatter/inspect:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/formatter:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/workspace/session/restore:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/workspace/projects/load:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/workspace/projects/save:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/workspace/projects/delete:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/source/inspect:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/published/save:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/published/project:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /api/published/yaml:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eklj3flh28i43p75tv
+        tag: $latest
+        service_account_id: aje1kqd422vq2vefkbbl
+        payload_format_version: "2.0"
+  /:
+    get:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: index.html
+    head:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: index.html
+  /assets/{path+}:
+    get:
+      parameters:
+        - name: path
+          in: path
+          required: false
+          schema:
+            type: string
+            default: "-"
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: "assets/{path}"
+    head:
+      parameters:
+        - name: path
+          in: path
+          required: false
+          schema:
+            type: string
+            default: "-"
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: "assets/{path}"
+  /{file}:
+    get:
+      parameters:
+        - name: file
+          in: path
+          required: false
+          schema:
+            type: string
+            default: "-"
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: "{file}"
+        error_object:
+          object: index.html
+          statusCode: 200
+    head:
+      parameters:
+        - name: file
+          in: path
+          required: false
+          schema:
+            type: string
+            default: "-"
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: "{file}"
+        error_object:
+          object: index.html
+          statusCode: 200
+  /{path+}:
+    get:
+      parameters:
+        - name: path
+          in: path
+          required: false
+          schema:
+            type: string
+            default: "-"
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: "{path}"
+        error_object:
+          object: index.html
+          statusCode: 200
+    head:
+      parameters:
+        - name: path
+          in: path
+          required: false
+          schema:
+            type: string
+            default: "-"
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: clash.solofarm.ru
+        object: "{path}"
+        error_object:
+          object: index.html
+          statusCode: 200

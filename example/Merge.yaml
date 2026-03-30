@@ -1,0 +1,200 @@
+# Profile Enhancement Merge Template for Clash Verge
+
+profile:
+  store-selected: true
+
+# 1. Сначала описываем источники (провайдеры)
+proxy-providers:
+  # lib_white:
+  #   type: http
+  #   url: "https://vless-extractor.yr-solo.workers.dev/?url=https://connliberty.com/connection/test_proxies_subs/23213932-1a03-4c0e-b80b-51ae3384edc7"
+  #   interval: 3600
+  #   path: ./lib_white.yaml
+  #   health-check:
+  #     enable: true
+  #     interval: 600
+  #     url: http://www.gstatic.com/generate_204
+
+  lib_auto:
+    type: http
+    url: "https://vless-extractor.yr-solo.workers.dev/?url=https://connliberty.com/connection/subs/23213932-1a03-4c0e-b80b-51ae3384edc7"
+    interval: 3600
+    path: ./lib_auto.yaml
+    health-check:
+      enable: true
+      interval: 600
+      url: http://www.gstatic.com/generate_204
+
+  # lib_tunnel:
+  #   type: http
+  #   url: "https://vless-extractor.yr-solo.workers.dev/?url=https://connliberty.com/connection/tunnel/23213932-1a03-4c0e-b80b-51ae3384edc7"
+  #   interval: 3600
+  #   path: ./lib_tunnel.yaml
+  #   health-check:
+  #     enable: true
+  #     interval: 600
+  #     url: http://www.gstatic.com/generate_204
+
+proxies:
+  # - name: "Personal_SOCKS5"
+  #   type: socks5
+  #   server: 206.123.158.180
+  #   port: 15485
+  #   username: "user367523"
+  #   password: "74q9v1"
+  #   udp: true
+  - name: "Personal_HTTP"
+    type: http
+    server: 195.158.194.74
+    port: 8000
+    username: "FHmgTs"
+    password: "RFBgtW"
+    
+
+proxy-groups:
+  # Группа для нейронок (ChatGPT, Codex и т.д.)
+  - name: "🤖 AI_SERVICES"
+    type: select
+    use: [lib_auto] # Использует прокси из этих подписок
+    proxies: [DIRECT, Personal_HTTP]
+
+  # Группа для YouTube и видео
+  - name: "📺 VIDEO_CONTENT"
+    type: select
+    use: [lib_auto]
+    proxies: [DIRECT, Personal_HTTP]
+
+  # Группа для Торрентов
+  - name: "🏴‍☠️ TORRENTS"
+    type: select
+    use: [lib_auto]
+    proxies: [DIRECT, Personal_HTTP]
+
+  # Группа для TELEGA
+  - name: "📢 TELEGA"
+  #   type: select
+  #   use: [lib_auto]
+  #   proxies: [DIRECT, Personal_HTTP]
+  
+    type: url-test # Меняем select на url-test
+    url: "http://www.gstatic.com/generate_204" # Адрес для проверки пинга
+    interval: 300 # Как часто проверять пинг (в секундах)
+    tolerance: 300 # Допуск в миллисекундах. Clash не будет переключаться на другой сервер, если он быстрее текущего меньше чем на 50 мс (чтобы не дергать соединение постоянно).
+    exclude-filter: "Россия|Russia|RU"
+    use: [lib_auto]
+
+  # Общий рубильник для всего остального
+  - name: "🌍 REST_OF_WORLD"
+    type: select
+    use: [lib_auto]
+    proxies: [DIRECT, Personal_HTTP]
+
+rules:
+
+  # === ЯНДЕКС И ЛОКАЛЬНЫЙ ТРАФИК ===
+  - PROCESS-NAME,YandexDisk.exe,DIRECT # Само приложение на ПК
+  - DOMAIN-SUFFIX,yandex.ru,DIRECT     # Сайты и сервисы Яндекса
+  - DOMAIN-SUFFIX,yandex.net,DIRECT    # Служебные домены (в т.ч. Диск)
+  - DOMAIN-SUFFIX,yadi.sk,DIRECT       # Ссылки на файлы Диска
+  
+  # ai
+  - DOMAIN-SUFFIX,openai.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,gemini.google.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,claude.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,stitch.withgoogle.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,notebooklm.google.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,telegram.com,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,pencil.dev,🤖 AI_SERVICES
+  - DOMAIN-SUFFIX,penpot.app,🤖 AI_SERVICES
+  
+  # === ТЕЛЕГРАМ ===
+  # Направляем само приложение Telegram (для Windows)
+  - PROCESS-NAME,Telegram.exe,📢 TELEGA
+  - PROCESS-NAME,telegram-desktop.exe,📢 TELEGA
+  - PROCESS-NAME,tdata.exe,📢 TELEGA
+  # Направляем веб-версию и ссылки
+  - DOMAIN-SUFFIX,telegram.org,📢 TELEGA
+  - DOMAIN-SUFFIX,t.me,📢 TELEGA
+  - DOMAIN-SUFFIX,telegram.me,📢 TELEGA
+  - DOMAIN-SUFFIX,tx.me,📢 TELEGA
+  # android
+  - PROCESS-NAME,org.telegram.messenger,📢 TELEGA  # Официальный Telegram
+  
+  # 2. Перехват по базам (Clash сам обновляет списки доменов и IP Телеграма)
+  - GEOSITE,telegram,📢 TELEGA
+  - GEOIP,telegram,📢 TELEGA
+  
+  # 3. Перехват по ASN (Telegram владеет этими сетями, они не меняются)
+  - IP-ASN,62041,📢 TELEGA  # Telegram Messenger Network
+  - IP-ASN,59930,📢 TELEGA  # Telegram Messenger Network
+  - IP-ASN,44907,📢 TELEGA  # Telegram Messenger Inc
+  - IP-ASN,211157,📢 TELEGA # Telegram FZ-LLC
+  
+  # 4. Домены (для ссылок и браузера)
+  - DOMAIN-SUFFIX,telegram.org,📢 TELEGA
+  - DOMAIN-SUFFIX,t.me,📢 TELEGA
+
+  # === INSTAGRAM & FACEBOOK ===
+  # 1. Приложения на Android (имена пакетов)
+  # === META (Instagram, Threads, Facebook) ===
+  
+  # 1. Пакеты Android-приложений
+  - PROCESS-NAME,com.instagram.android,📺 VIDEO_CONTENT     # Instagram
+  - PROCESS-NAME,com.instagram.barcelona,📺 VIDEO_CONTENT   # Threads
+  - PROCESS-NAME,com.facebook.katana,📺 VIDEO_CONTENT       # Facebook
+  - PROCESS-NAME,com.whatsapp,📺 VIDEO_CONTENT             # WhatsApp (на всякий случай)
+  
+  # 2. Перехват по базам (очень важно для мобилок)
+  - GEOSITE,instagram,📺 VIDEO_CONTENT
+  - GEOSITE,facebook,📺 VIDEO_CONTENT
+  - GEOIP,facebook,📺 VIDEO_CONTENT
+  
+  # 3. Перехват по ASN (Автономные системы серверов Цукерберга)
+  - IP-ASN,32934,📺 VIDEO_CONTENT
+  - IP-ASN,63293,📺 VIDEO_CONTENT
+  - IP-ASN,54115,📺 VIDEO_CONTENT
+  
+  # 4. Домены сайтов и CDN (для браузера и ссылок)
+  - DOMAIN-SUFFIX,instagram.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,cdninstagram.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,threads.net,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,facebook.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,facebook.net,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,fbcdn.net,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,fbsbx.com,📺 VIDEO_CONTENT
+
+  
+  # 2. Приложения на ПК (из Windows Store)
+  - PROCESS-NAME,Instagram.exe,📺 VIDEO_CONTENT
+  - PROCESS-NAME,Facebook.exe,📺 VIDEO_CONTENT
+  - PROCESS-NAME,Messenger.exe,📺 VIDEO_CONTENT
+  
+  # 3. Домены сайтов и серверов (для браузера, API и картинок)
+  - DOMAIN-SUFFIX,instagram.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,cdninstagram.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,facebook.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,fb.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,fbcdn.net,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,fbsbx.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,meta.com,📺 VIDEO_CONTENT
+
+  # Направляем трафик в созданные группы
+
+
+  - DOMAIN-SUFFIX,googlevideo.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,youtube.com,📺 VIDEO_CONTENT
+  - DOMAIN-SUFFIX,x.com,📺 VIDEO_CONTENT
+  
+  # === ТОРРЕНТЫ ===
+  - DOMAIN-SUFFIX,rutracker.org,🏴‍☠️ TORRENTS
+  - PROCESS-NAME,qbittorrent.exe,🏴‍☠️ TORRENTS # Пример для программы-торрента
+  - PROCESS-NAME,uTorrent.exe,🏴‍☠️ TORRENTS
+  
+  # Локальный трафик всегда напрямую
+  - DOMAIN-SUFFIX,local,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT
+  
+  # Всё остальное идет через общий селектор
+  - MATCH,🌍 REST_OF_WORLD
