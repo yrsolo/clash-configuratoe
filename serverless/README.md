@@ -4,7 +4,7 @@ Serverless code used behind the public gateway lives here.
 
 ## Current Contents
 
-- `workspace-bridge/` - Yandex Cloud Function that handles workspace restore/load/save/delete and published project/YAML reads
+- `workspace-bridge/` - Yandex Cloud Function that handles workspace restore/load/save/delete, published project/YAML reads, formatter requests, and source inspection probes
 
 ## Why It Exists
 

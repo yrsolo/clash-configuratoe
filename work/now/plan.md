@@ -1,6 +1,6 @@
 # Plan
 
-1. Compare the current repo against `start.md` and identify missing load-bearing pieces.
-2. Add the missing operational, docs, and tracking files with minimal useful content.
-3. Update existing overview docs and docs checks to reflect the intended structure.
-4. Remove obvious root clutter and re-run docs and code checks.
+1. Audit root docs, `docs/`, and env examples against the current running product.
+2. Update stale descriptions, routes, status text, and runtime assumptions.
+3. Remove obvious repository clutter and temporary artifacts that do not belong in the frozen baseline.
+4. Re-run docs and code checks, then record the cleaned state in evidence.

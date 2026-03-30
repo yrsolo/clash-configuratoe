@@ -1,10 +1,10 @@
 # clash-configuratoe
 
-`clash-configuratoe` is a static-first visual builder for Clash Verge configurations. Users assemble proxy providers, manual proxies, proxy groups, and rule blocks on a node canvas, then publish a shareable YAML link and QR code.
+`clash-configuratoe` is a static-first visual builder for Clash Verge configurations. Users assemble proxy providers, manual proxies, proxy groups, rule blocks, and visual panels on a node canvas, then publish a stable YAML URL or guest snapshot.
 
 ## What It Is
 
-This repository contains the MVP foundation for a browser-based Clash configuration editor. The product uses a canonical JSON project format for editing and persistence, while generating Clash-compatible YAML as a derived artifact for export and sharing.
+This repository contains the current working baseline for a browser-based Clash configuration editor. The product uses a canonical JSON project format for editing and persistence, while generating Clash-compatible YAML as a derived artifact for export and sharing.
 
 ## Why It Exists
 
@@ -14,9 +14,11 @@ Editing large Clash configs by hand is slow, error-prone, and hard to explain to
 
 - Node-based editor for providers, proxies, groups, rules, and visual canvas panels
 - Canonical JSON project model with lossless editor metadata
+- JSON export for lossless project backup and transfer
 - Clash YAML export and best-effort Clash YAML import
 - Stable published YAML links for workspace projects, plus guest snapshot publish links and QR codes
 - Lightweight hash-based personal workspaces backed by a serverless storage bridge
+- Same-origin formatter and source inspection routes behind the Yandex gateway
 - Built-in starter presets and local draft autosave
 
 ## Quick Start
@@ -59,4 +61,4 @@ Start here:
 
 ## Status
 
-MVP foundation in progress. The repository now includes the starter architecture, domain schema, YAML import/export pipeline, a working node editor, and a live serverless bridge for workspace and publish persistence. Strong authentication and secret-backed subscription transformation still remain future hardening work.
+Feature development is currently paused. The repository should be treated as a working MVP baseline with a live editor, serverless workspace/publish bridge, same-origin formatter, and cloud-side source inspection. The main remaining gaps are product hardening and stronger auth, not missing core editor infrastructure.

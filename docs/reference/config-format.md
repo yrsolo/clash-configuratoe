@@ -9,6 +9,8 @@ The app edits a `ConfigProject` document with:
 - `canvasGroups`: visual panels on the editor canvas
 - `meta`: version and editor metadata
 
+The default starter project used by the web app lives in [default/new.json](/n:/PROJECTS/service/clash-configuratoe/default/new.json).
+
 ## Supported Node Kinds
 
 - `globalSettings`

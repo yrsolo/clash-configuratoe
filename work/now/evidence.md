@@ -2,18 +2,13 @@
 
 ## Verified
 
-- the repo had strong product code but was still missing part of the starter-template operating structure from `start.md`
-- `agent/OPERATING_CONTRACT.md`, prompt notes, and baseline policy files are now present
-- `.codex/skills/verify-docs-architecture` and `.codex/skills/trace-source-of-truth` are now present alongside the existing starter skill set
-- the remaining starter baseline skills now exist too: `check-readme-role`, `update-tracking`, `run-tests`, `prepare-release`
-- missing load-bearing docs were added for architecture and process indexes, ideal principles, documentation governance, release flow, and skill usage
-- additional useful template-aligned docs were added for API, commands, archive/artifacts, serverless, and future test layers
-- tracking support files now exist for `work/now/README.md`, `work/roadmap/README.md`, and `work/archive/README.md`
-- repo navigation docs now point to the operational layer, not just the product code
-- `scripts/docs-check.mjs` now verifies the starter-template minimum set instead of only the initial MVP docs subset
-- stale documentation about local publish stubs and planned-only serverless behavior was removed
-- docs now reflect the real same-origin routes under `/api/workspace/*` and `/api/published/*`
-- docs now reflect the current stable publish URL model for workspace projects
+- root `README.md` now reflects the current product shape: visual panels, JSON export, stable workspace publish URLs, same-origin formatter, and source inspection
+- architecture and reference docs were updated to match the real system instead of earlier MVP assumptions
+- `docs/reference/api.md` no longer describes source inspection as raw TCP latency; it now reflects cloud-side probe behavior
+- `docs/reference/env.md` and checked-in env examples now match the actual runtime variables used by the web app and serverless bridge
+- `apps/web/README.md` and `serverless/README.md` now describe the current responsibilities of those repo areas
+- `work/now/current-task.md` and `work/now/plan.md` now reflect the documentation-and-cleanup pause instead of an older template-alignment task
+- obvious transient files were removed, including test runner cache and unpacked or archived helper artifacts under `work/now`
 
 ## Checks Run
 
@@ -23,5 +18,4 @@
 
 ## Residual Risks
 
-- the repo still intentionally does not implement every optional file from `start.md` such as `pyproject.toml`, `Dockerfile`, or a separate `apps/api`, because this project is currently Node-first and serverless-backed
-- `serverless/` is now an intentional repo zone even though it was not in the original first-pass docs
+- stronger auth and ownership controls remain future work; the docs now describe this explicitly instead of implying those capabilities already exist

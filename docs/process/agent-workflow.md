@@ -13,5 +13,5 @@
 - keep root docs concise
 - keep YAML logic in `packages/schema`
 - keep UI logic in `apps/web`
-- keep future serverless details documented, not hard-coded into the client
+- keep serverless details documented and isolated behind the same-origin bridge
 - keep temporary screenshots and scratch artifacts inside `work/now`
