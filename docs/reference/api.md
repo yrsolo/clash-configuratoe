@@ -86,5 +86,6 @@ Behavior:
 Request body:
 
 - `url`
+- `probeUrl` (optional)
 
-Returns JSON with parsed proxies from the source plus best-effort TCP latency to each `server:port`.
+Returns JSON with parsed proxies from the source plus cloud-side probe results through the parsed proxies. This is a server-side health probe, not a client-device Clash latency measurement.

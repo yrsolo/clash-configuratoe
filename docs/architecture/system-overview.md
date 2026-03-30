@@ -20,11 +20,11 @@ The MVP is a static-first web application:
 2. The app validates the graph.
 3. The schema package renders Clash YAML.
 4. Workspace save persists sanitized JSON, YAML, and secrets through the serverless bridge.
-5. The app returns a secret-token share link, a raw YAML URL, and a QR code.
+5. The app keeps one stable published YAML URL per workspace project, or creates a guest snapshot publish when no workspace is active.
 
 ## Near-Term Boundaries
 
 - no standalone backend application in MVP
 - no traditional authenticated backend yet; identity is still weak hash-based
 - workspace and published artifact persistence already run through same-origin serverless APIs
-- VLESS subscription resolving is abstracted behind a resolver interface for later serverless implementation
+- subscription formatting, publish persistence, and source inspection already run in the cloud-function boundary

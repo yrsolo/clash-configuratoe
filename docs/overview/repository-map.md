@@ -9,7 +9,7 @@
 - `agent` - operating contract, prompt notes, and policy files
 - `.codex/skills` - procedural skills for docs, tracking, and checks
 - `serverless` - cloud-function bridge code used behind the gateway
-- `tests` - future integration and e2e suites
+- `tests` - top-level integration and e2e placeholders; active package-level tests live next to their code
 - `artifacts` - durable generated assets worth keeping
 - `scripts` - developer helpers
 - `.github/workflows` - CI automation

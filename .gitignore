@@ -21,6 +21,7 @@ artifacts/generated/
 
 # Test
 .vitest/
+test-results/
 
 # Logs
 *.log

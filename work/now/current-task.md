@@ -2,25 +2,28 @@
 
 ## Title
 
-Bring the repository back into alignment with `start.md`.
+Pause feature work and freeze the repository into a clean, documented baseline.
 
 ## Goal
 
-Close the gap between the working product code and the starter-template operating structure, without bloating the repo.
+Make the current repository state easy to understand and safe to resume later:
+
+- root docs and `docs/` should match the real product
+- stale wording should be removed
+- obvious repo clutter and temporary artifacts should be cleaned up
 
 ## Scope
 
-- add the missing `agent/` operational layer
-- add the missing `.codex/skills/` starter skills
-- fill in the missing process and architecture docs required by the template
-- tighten tracking and docs checks around the intended structure
-- audit docs against the real workspace, publish, and serverless behavior
+- audit root docs, architecture docs, reference docs, and process docs
+- align env examples with real runtime usage
+- remove obvious transient files and unpacked helper artifacts
+- refresh tracking so the repo reflects a documentation and cleanup pause, not active feature expansion
 
 ## Risks
 
-- creating duplicate docs instead of clarifying ownership
-- drifting `docs-check` away from the actual starter contract
-- leaving stale temporary artifacts in the root or other permanent zones
+- accidentally preserving stale product assumptions in multiple places
+- deleting evidence that is still useful
+- leaving env examples or reference docs out of sync with the actual serverless boundary
 
 ## Docs Needed
 
