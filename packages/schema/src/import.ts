@@ -117,26 +117,33 @@ export const importClashYaml = (source: string): ConfigProject => {
     }
   }));
 
-  const groupNodes: ProxyGroupNode[] = (parsed["proxy-groups"] ?? []).map((group: any, index: number) => ({
+  const parsedGroups = parsed["proxy-groups"] ?? [];
+  const firstAutoSelectUrl = parsedGroups.find((group: any) => group.type === "url-test" && group.url)?.url;
+  if (firstAutoSelectUrl) {
+    globals.settings.healthCheckUrl = firstAutoSelectUrl;
+  }
+
+  const groupNodes: ProxyGroupNode[] = parsedGroups.map((group: any, index: number) => ({
     id: crypto.randomUUID(),
     kind: "proxyGroup",
     label: transliterateLabel(group.name),
     position: getPosition(index, 2.1),
     enabled: true,
-      group: {
-        name: group.name,
-        includeDirect: Array.isArray(group.proxies) && group.proxies.includes("DIRECT"),
-        autoSelect: group.type === "url-test",
-        catchAll: false,
-        interval: group.interval ?? 300,
-        tolerance: group.tolerance ?? 300
+    group: {
+      name: group.name,
+      includeDirect: Array.isArray(group.proxies) && group.proxies.includes("DIRECT"),
+      autoSelect: group.type === "url-test",
+      catchAll: false,
+      customHealthCheckEnabled: Boolean(
+        group.type === "url-test" &&
+          group.url &&
+          group.url !== firstAutoSelectUrl
+      ),
+      customHealthCheckUrl: group.url ?? "http://www.gstatic.com/generate_204",
+      interval: group.interval ?? 300,
+      tolerance: group.tolerance ?? 300
     }
   }));
-
-  const firstAutoSelectUrl = (parsed["proxy-groups"] ?? []).find((group: any) => group.type === "url-test" && group.url)?.url;
-  if (firstAutoSelectUrl) {
-    globals.settings.healthCheckUrl = firstAutoSelectUrl;
-  }
 
   const edges: GraphEdge[] = [];
 

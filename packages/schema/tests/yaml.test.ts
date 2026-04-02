@@ -17,4 +17,23 @@ describe("renderClashYaml", () => {
     expect(yaml).not.toContain("healthCheck:");
     expect(yaml).toMatch(/url:\s+"https?:\/\/.+"/);
   });
+
+  it("renders a custom ping url for auto-select groups when enabled", () => {
+    const project = createDemoProject();
+    const telegramGroup = project.nodes.find(
+      (node) => node.kind === "proxyGroup" && node.group.name === "Telegram"
+    );
+
+    if (!telegramGroup || telegramGroup.kind !== "proxyGroup") {
+      throw new Error("Telegram group not found in demo project");
+    }
+
+    telegramGroup.group.autoSelect = true;
+    telegramGroup.group.customHealthCheckEnabled = true;
+    telegramGroup.group.customHealthCheckUrl = "https://cp.cloudflare.com/generate_204";
+
+    const yaml = renderClashYaml(project);
+
+    expect(yaml).toContain('url: "https://cp.cloudflare.com/generate_204"');
+  });
 });

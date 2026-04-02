@@ -557,6 +557,7 @@ textarea {
 }
 
 .rule-panel-node__resize {
+  position: absolute;
   width: 22px !important;
   height: 22px !important;
   right: -1px !important;
@@ -564,6 +565,8 @@ textarea {
   border: none !important;
   background: transparent !important;
   opacity: 0.78;
+  cursor: nwse-resize;
+  z-index: 5;
 }
 
 .rule-panel-node__resize:hover,
@@ -635,6 +638,12 @@ textarea {
   margin: 0;
 }
 
+.yaml-preview-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .source-inspect-modal {
   width: min(1200px, 100%);
 }
@@ -691,6 +700,11 @@ textarea {
   color: rgba(15, 23, 42, 0.72);
   font-size: 0.88rem;
   word-break: break-word;
+}
+
+.source-inspect-card__host--secondary {
+  color: rgba(15, 23, 42, 0.56);
+  font-size: 0.8rem;
 }
 
 .source-inspect-card__metrics {

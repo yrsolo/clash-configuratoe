@@ -106,6 +106,26 @@ export const publishProject = async (
   };
 };
 
+export const refreshPublishedYaml = async (id: string, token: string): Promise<string> => {
+  const response = await fetch(`${publishRoot}/published/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id,
+      token
+    })
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to refresh published YAML.");
+  }
+
+  return response.text();
+};
+
 export const loadPublishedProject = async (id: string, token: string): Promise<ConfigProject | null> => {
   const response = await fetch(`${publishRoot}/published/project?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`);
   if (!response.ok) {

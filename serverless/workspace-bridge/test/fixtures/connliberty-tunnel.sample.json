@@ -1,0 +1,99 @@
+[
+  {
+    "remarks": "GB bypass",
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "tag": "proxy",
+        "settings": {
+          "vnext": [
+            {
+              "address": "uk-gthost-01.com",
+              "port": 443,
+              "users": [
+                {
+                  "id": "e850aa2c-aa87-48ff-8a52-81a863ef5218",
+                  "flow": "xtls-rprx-vision"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "tcp",
+          "security": "reality",
+          "realitySettings": {
+            "fingerprint": "random",
+            "publicKey": "dY9SNEllJMW63xo-JdXufhmjAxB_4uFw_QMjgufjiD8",
+            "serverName": "rbc.ru",
+            "shortId": "37772edff71b4167"
+          },
+          "sockopt": {
+            "dialerProxy": "ru-upstream"
+          }
+        }
+      },
+      {
+        "protocol": "socks",
+        "tag": "ru-upstream",
+        "settings": {
+          "servers": [
+            {
+              "address": "45.153.161.147",
+              "port": 59101,
+              "users": [
+                {
+                  "user": "vpnliberty0Ft9z",
+                  "pass": "RDqd5pojmM"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "protocol": "freedom",
+        "tag": "direct"
+      }
+    ]
+  },
+  {
+    "remarks": "WS bypass",
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "tag": "proxy",
+        "settings": {
+          "vnext": [
+            {
+              "address": "ws-gateway.example.com",
+              "port": 8443,
+              "users": [
+                {
+                  "id": "11111111-2222-3333-4444-555555555555"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "serverName": "cdn.example.com"
+          },
+          "wsSettings": {
+            "path": "/proxy",
+            "headers": {
+              "Host": "cdn.example.com"
+            }
+          }
+        }
+      },
+      {
+        "protocol": "freedom",
+        "tag": "direct"
+      }
+    ]
+  }
+]

@@ -4,11 +4,19 @@ import { MarkerType, Position, type Edge, type Node } from "@xyflow/react";
 type FlowOptions = {
   onToggleEnabled?: (nodeId: string, nextEnabled: boolean) => void;
   onTogglePanelEnabled?: (panelId: string, nextEnabled: boolean) => void;
+  onPanelResize?: (panelId: string, size: { width: number; height: number }) => void;
+  onPanelResizeEnd?: (panelId: string, size: { width: number; height: number }) => void;
 };
 
 type PanelLayout = {
   panels: Map<string, { position: { x: number; y: number }; size: { width: number; height: number } }>;
   rulePositions: Map<string, { x: number; y: number }>;
+};
+
+type FlowNodeLike = Pick<Node, "id" | "position"> & {
+  width?: number;
+  height?: number;
+  measured?: { width?: number; height?: number };
 };
 
 const RULE_PANEL_PADDING_X = 10;
@@ -266,6 +274,10 @@ export const projectToFlowNodes = (project: ConfigProject, options: FlowOptions 
       position: layout.position,
       width: layout.size.width,
       height: layout.size.height,
+      style: {
+        width: layout.size.width,
+        height: layout.size.height
+      },
       initialWidth: layout.size.width,
       initialHeight: layout.size.height,
       selectable: true,
@@ -285,7 +297,12 @@ export const projectToFlowNodes = (project: ConfigProject, options: FlowOptions 
               }
             ]
           : [],
-      data: { panel, onToggleEnabled: options.onTogglePanelEnabled }
+      data: {
+        panel,
+        onToggleEnabled: options.onTogglePanelEnabled,
+        onResize: options.onPanelResize,
+        onResizeEnd: options.onPanelResizeEnd
+      }
     };
   });
 
@@ -314,6 +331,61 @@ export const projectToFlowNodes = (project: ConfigProject, options: FlowOptions 
   });
 
   return [...panelNodes, ...configNodes];
+};
+
+export const moveGenericPanelChildrenInFlow = (
+  flowNodes: Node[],
+  project: ConfigProject,
+  panelId: string,
+  delta: { dx: number; dy: number }
+) => {
+  if (!delta.dx && !delta.dy) {
+    return flowNodes;
+  }
+
+  const panel = project.canvasGroups.find((entry) => entry.id === panelId);
+  if (!panel || panel.role !== "generic" || panel.enabled === false) {
+    return flowNodes;
+  }
+
+  const childIds = new Set(
+    project.nodes
+      .filter((node) => node.canvasGroupId === panelId)
+      .map((node) => node.id)
+  );
+
+  if (childIds.size === 0) {
+    return flowNodes;
+  }
+
+  return flowNodes.map((node) =>
+    childIds.has(node.id)
+      ? {
+          ...node,
+          position: {
+            x: node.position.x + delta.dx,
+            y: node.position.y + delta.dy
+          }
+        }
+      : node
+  );
+};
+
+const getFlowNodeSize = (node: FlowNodeLike) => {
+  const width =
+    typeof node.width === "number"
+      ? node.width
+      : typeof node.measured?.width === "number"
+        ? node.measured.width
+        : undefined;
+  const height =
+    typeof node.height === "number"
+      ? node.height
+      : typeof node.measured?.height === "number"
+        ? node.measured.height
+        : undefined;
+
+  return { width, height };
 };
 
 const getSourceHandle = (edge: GraphEdge, project: ConfigProject) => {
@@ -366,6 +438,10 @@ export const applyNodePositions = (project: ConfigProject, nodes: Node[]): Confi
     const match = nodes.find((node) => node.id === group.id);
     if (!match) return group;
 
+    const { width: nextWidthRaw, height: nextHeightRaw } = getFlowNodeSize(match);
+    const nextWidth = typeof nextWidthRaw === "number" ? nextWidthRaw : group.size.width;
+    const nextHeight = typeof nextHeightRaw === "number" ? nextHeightRaw : group.size.height;
+
     groupPositionChanges.set(group.id, {
       dx: match.position.x - group.position.x,
       dy: match.position.y - group.position.y
@@ -377,8 +453,8 @@ export const applyNodePositions = (project: ConfigProject, nodes: Node[]): Confi
       size:
         group.role === "generic"
           ? {
-              width: Math.max(match.width ?? group.size.width, GENERIC_PANEL_MIN_WIDTH),
-              height: Math.max(match.height ?? group.size.height, GENERIC_PANEL_MIN_HEIGHT)
+              width: Math.max(nextWidth, GENERIC_PANEL_MIN_WIDTH),
+              height: Math.max(nextHeight, GENERIC_PANEL_MIN_HEIGHT)
             }
           : group.size
     };

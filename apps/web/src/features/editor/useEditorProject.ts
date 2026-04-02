@@ -4,7 +4,6 @@ import {
   configProjectSchema,
   createCanvasGroup,
   importClashYaml,
-  renderClashYaml,
   validateProject,
   type ConfigNode,
   type ConfigProject,
@@ -19,7 +18,11 @@ import exampleMergeYaml from "../../../../../example/Merge.yaml?raw";
 import defaultNewProject from "../../../../../default/new.json";
 
 import { createNode } from "./defaults";
-import { buildWorkspacePublishArtifact, publishProject } from "@/shared/publish";
+import {
+  buildWorkspacePublishArtifact,
+  publishProject,
+  refreshPublishedYaml
+} from "@/shared/publish";
 import { clearDraft, loadDraft, saveDraft } from "@/shared/storage";
 import {
   buildUserKey,
@@ -102,9 +105,11 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
   });
   const hydrationRef = useRef(false);
   const saveTimeoutRef = useRef<number | null>(null);
-
   const validationIssues = useMemo(() => validateProject(project), [project]);
-  const yamlPreview = useMemo(() => renderClashYaml(project), [project]);
+  const [yamlPreview, setYamlPreview] = useState(
+    "# Published YAML preview appears here after you refresh the stable publish link.\n"
+  );
+  const [yamlPreviewStatus, setYamlPreviewStatus] = useState<"idle" | "loading" | "error">("idle");
 
   const persistWorkspaceProject = async (
     targetProject: ConfigProject,
@@ -641,8 +646,16 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
   };
 
   const publish = async () => {
+    setYamlPreviewStatus("loading");
     const artifact = await publishProject(project, workspaceSession);
     setPublishArtifact(artifact);
+    try {
+      const publishedYaml = await refreshPublishedYaml(artifact.projectId, artifact.token);
+      setYamlPreview(publishedYaml);
+      setYamlPreviewStatus("idle");
+    } catch {
+      setYamlPreviewStatus("error");
+    }
   };
 
   const resetToDemo = () => {
@@ -663,6 +676,7 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     addNodeAt,
     addCanvasGroupAt,
     yamlPreview,
+    yamlPreviewStatus,
     validationIssues,
     yamlImport,
     setYamlImport,

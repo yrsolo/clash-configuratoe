@@ -89,6 +89,8 @@ export const createNode = (kind: ConfigNode["kind"], count: number): ConfigNode 
         includeDirect: true,
         autoSelect: false,
         catchAll: false,
+        customHealthCheckEnabled: false,
+        customHealthCheckUrl: "http://www.gstatic.com/generate_204",
         interval: 300,
         tolerance: 300
       }

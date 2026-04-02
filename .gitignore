@@ -18,6 +18,7 @@ Thumbs.db
 # Build artifacts
 artifacts/tmp/
 artifacts/generated/
+serverless/*.zip
 
 # Test
 .vitest/

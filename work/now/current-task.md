@@ -2,28 +2,29 @@
 
 ## Title
 
-Pause feature work and freeze the repository into a clean, documented baseline.
+Freeze the current baseline: sync docs, remove repository junk, and confirm the editor/serverless state is ready to pause.
 
 ## Goal
 
-Make the current repository state easy to understand and safe to resume later:
+Leave the repository in a clean pause-ready state:
 
-- root docs and `docs/` should match the real product
-- stale wording should be removed
-- obvious repo clutter and temporary artifacts should be cleaned up
+- documentation should describe the current baseline accurately
+- obvious temporary artifacts and deploy junk should be removed
+- work tracking should reflect freeze status instead of active feature iteration
+- final checks should confirm that the current editor, schema, and docs still pass
 
 ## Scope
 
-- audit root docs, architecture docs, reference docs, and process docs
-- align env examples with real runtime usage
-- remove obvious transient files and unpacked helper artifacts
-- refresh tracking so the repo reflects a documentation and cleanup pause, not active feature expansion
+- audit README and key architecture/reference docs against the current implementation
+- reflect the current visual-panel behavior, published preview behavior, and workspace/serverless baseline
+- remove obvious temporary repository artifacts that should not stay in a frozen baseline
+- rerun the relevant checks for a pause-ready handoff
 
 ## Risks
 
-- accidentally preserving stale product assumptions in multiple places
-- deleting evidence that is still useful
-- leaving env examples or reference docs out of sync with the actual serverless boundary
+- updating docs incompletely and leaving stale claims in place
+- deleting a file that is actually part of the intended deploy path
+- declaring the repo freeze-ready without rerunning checks after cleanup
 
 ## Docs Needed
 

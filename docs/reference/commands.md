@@ -9,6 +9,7 @@
 - `npm run test` - build schema and run schema + web tests
 - `npm run build` - build schema and web app
 - `npm run release-check` - docs-check + typecheck + test + build
+- `npm run deploy:workspace-bridge` - package the cloud function, upload the zip to Object Storage, create a new Yandex Cloud Function version, and update the API gateway spec
 
 ## Make
 
@@ -25,3 +26,7 @@
 - `bash scripts/docs-check.sh`
 - `bash scripts/test.sh`
 - `bash scripts/release-check.sh`
+
+## PowerShell Helpers
+
+- `powershell -ExecutionPolicy Bypass -File scripts/deploy-workspace-bridge.ps1` - recommended deploy path for the `workspace-bridge` function on this repo's Windows-first workstation setup

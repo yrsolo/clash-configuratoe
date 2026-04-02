@@ -244,6 +244,8 @@ export const createDemoProject = (): ConfigProject => {
         includeDirect: true,
         autoSelect: false,
         catchAll: false,
+        customHealthCheckEnabled: false,
+        customHealthCheckUrl: "http://www.gstatic.com/generate_204",
         interval: 300,
         tolerance: 300
       }
@@ -260,6 +262,8 @@ export const createDemoProject = (): ConfigProject => {
         includeDirect: false,
         autoSelect: true,
         catchAll: false,
+        customHealthCheckEnabled: false,
+        customHealthCheckUrl: "http://www.gstatic.com/generate_204",
         interval: 300,
         tolerance: 300
       }
@@ -276,6 +280,8 @@ export const createDemoProject = (): ConfigProject => {
         includeDirect: true,
         autoSelect: false,
         catchAll: false,
+        customHealthCheckEnabled: false,
+        customHealthCheckUrl: "http://www.gstatic.com/generate_204",
         interval: 300,
         tolerance: 300
       }
@@ -292,6 +298,8 @@ export const createDemoProject = (): ConfigProject => {
         includeDirect: true,
         autoSelect: false,
         catchAll: true,
+        customHealthCheckEnabled: false,
+        customHealthCheckUrl: "http://www.gstatic.com/generate_204",
         interval: 300,
         tolerance: 300
       }

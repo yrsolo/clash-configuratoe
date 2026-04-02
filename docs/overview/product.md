@@ -17,6 +17,7 @@ Manual Clash YAML quickly becomes hard to reason about when providers, groups, a
 ## Main Scenarios
 
 - build a config from scratch on a graph canvas
+- organize the graph with free-form visual panels and dedicated rule panels
 - import an existing Clash YAML and continue editing visually
 - apply built-in presets for AI, Telegram, video, torrents, and default traffic
 - keep a stable client subscription URL for one workspace project and update the YAML behind that same link

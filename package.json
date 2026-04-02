@@ -14,7 +14,8 @@
     "typecheck": "npm run typecheck --workspace @clash-configuratoe/schema && npm run typecheck --workspace @clash-configuratoe/web",
     "docs-check": "node scripts/docs-check.mjs",
     "release-check": "npm run docs-check && npm run typecheck && npm run test && npm run build",
-    "bootstrap": "npm install"
+    "bootstrap": "npm install",
+    "deploy:workspace-bridge": "powershell -ExecutionPolicy Bypass -File scripts/deploy-workspace-bridge.ps1"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

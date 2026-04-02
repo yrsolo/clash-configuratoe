@@ -23,12 +23,13 @@ import {
   type RuleSetNode,
   type ProxyProviderNode
 } from "@clash-configuratoe/schema";
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
 import { EditorNode, PanelNode } from "@/features/editor/nodeTypes";
 import {
   applyNodePositions,
   findOverlappingPanel,
+  moveGenericPanelChildrenInFlow,
   projectToFlowEdges,
   projectToFlowNodes,
   removeCanvasGroup,
@@ -190,6 +191,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     updateNode,
     updateCanvasGroup,
     yamlPreview,
+    yamlPreviewStatus,
     validationIssues,
     yamlImport,
     setYamlImport,
@@ -219,7 +221,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
   const [yamlPreviewExpanded, setYamlPreviewExpanded] = useState(false);
   const [sourceInspect, setSourceInspect] = useState<{
     node: ProxyProviderNode;
-    status: "loading" | "ready" | "error";
+    status: "idle" | "loading" | "ready" | "error";
     data: SourceInspectResult | null;
     error: string | null;
   } | null>(null);
@@ -254,11 +256,14 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     () =>
       projectToFlowNodes(project, {
         onToggleEnabled: setNodeEnabled,
-        onTogglePanelEnabled: setPanelEnabled
+        onTogglePanelEnabled: setPanelEnabled,
+        onPanelResize: handleGenericPanelResize,
+        onPanelResizeEnd: commitGenericPanelResize
       }),
     [project]
   );
   const [flowNodes, setFlowNodes] = useState(nodes);
+  const flowNodesRef = useRef(nodes);
   const edges = useMemo(() => projectToFlowEdges(project), [project]);
   const selectedNode = project.nodes.find((node) => node.id === selectedId) ?? null;
   const selectedGroup = project.canvasGroups.find((group) => group.id === selectedGroupId) ?? null;
@@ -304,16 +309,106 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
 
   useEffect(() => {
     setFlowNodes(nodes);
+    flowNodesRef.current = nodes;
   }, [nodes]);
+
+  function updateFlowPanelSize(panelId: string, size: { width: number; height: number }) {
+    setFlowNodes((currentFlowNodes) => {
+      const nextFlowNodes = currentFlowNodes.map((entry) =>
+        entry.id === panelId
+          ? {
+              ...entry,
+              width: Math.max(size.width, 240),
+              height: Math.max(size.height, 180),
+              style: {
+                ...(typeof entry.style === "object" && entry.style ? entry.style : {}),
+                width: Math.max(size.width, 240),
+                height: Math.max(size.height, 180)
+              },
+              measured: {
+                width: Math.max(size.width, 240),
+                height: Math.max(size.height, 180)
+              }
+            }
+          : entry
+      );
+      flowNodesRef.current = nextFlowNodes;
+      return nextFlowNodes;
+    });
+  }
+
+  function handleGenericPanelResize(panelId: string, size: { width: number; height: number }) {
+    updateFlowPanelSize(panelId, size);
+  }
+
+  function commitGenericPanelResize(panelId: string, size: { width: number; height: number }) {
+    updateFlowPanelSize(panelId, size);
+    const nextFlowNodes = flowNodesRef.current;
+    setProject((current) => applyNodePositions(current, nextFlowNodes));
+  }
 
   const onNodesChange = (changes: NodeChange[]) => {
     setFlowNodes((currentFlowNodes) => {
-      const nextFlowNodes = applyNodeChanges(changes, currentFlowNodes);
+      const panelDragDeltas = changes.reduce<Array<{ panelId: string; dx: number; dy: number }>>(
+        (accumulator, change) => {
+          if (change.type !== "position" || !("position" in change) || !change.position) {
+            return accumulator;
+          }
+
+          const isGenericPanelMove = project.canvasGroups.some(
+            (group) =>
+              group.id === change.id &&
+              group.role === "generic" &&
+              group.enabled !== false
+          );
+
+          if (!isGenericPanelMove) {
+            return accumulator;
+          }
+
+          const previousPanelNode = currentFlowNodes.find((entry) => entry.id === change.id);
+          if (!previousPanelNode) {
+            return accumulator;
+          }
+
+          accumulator.push({
+            panelId: change.id,
+            dx: change.position.x - previousPanelNode.position.x,
+            dy: change.position.y - previousPanelNode.position.y
+          });
+
+          return accumulator;
+        },
+        []
+      ).filter((delta) => !!delta.dx || !!delta.dy);
+
+      let nextFlowNodes = applyNodeChanges(changes, currentFlowNodes);
+
+      for (const delta of panelDragDeltas) {
+        nextFlowNodes = moveGenericPanelChildrenInFlow(nextFlowNodes, project, delta.panelId, {
+          dx: delta.dx,
+          dy: delta.dy
+        });
+      }
+
+      flowNodesRef.current = nextFlowNodes;
       const isIntermediateResize = changes.some(
         (change) => change.type === "dimensions" && change.resizing
       );
+      const hasFinalResize = changes.some(
+        (change) => change.type === "dimensions" && !change.resizing
+      );
+      const hasPanelPositionChange = changes.some(
+        (change) =>
+          change.type === "position" &&
+          project.canvasGroups.some((group) => group.id === change.id)
+      );
 
-      if (!isIntermediateResize) {
+      if (!isIntermediateResize && !hasFinalResize && !hasPanelPositionChange) {
+        setProject((currentProject) => applyNodePositions(currentProject, nextFlowNodes));
+      }
+
+      if (hasFinalResize) {
         setProject((currentProject) => applyNodePositions(currentProject, nextFlowNodes));
       }
 
@@ -361,6 +456,22 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
   };
 
   const onNodeDragStop = (_event: MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+    const draggedPanel = project.canvasGroups.find((entry) => entry.id === node.id);
+    if (draggedPanel) {
+      const nextFlowNodes = flowNodesRef.current.map((entry) =>
+        entry.id === node.id
+          ? {
+              ...entry,
+              position: node.position
+            }
+          : entry
+      );
+      flowNodesRef.current = nextFlowNodes;
+      setFlowNodes(nextFlowNodes);
+      setProject((current) => applyNodePositions(current, nextFlowNodes));
+      return;
+    }
+
     const configNode = project.nodes.find((entry) => entry.id === node.id);
     if (!configNode) {
       return;
@@ -397,10 +508,41 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     });
 
     try {
-      const data = await inspectSource(
-        node.subscriptionUrl,
-        globalSettingsNode?.kind === "globalSettings" ? globalSettingsNode.settings.healthCheckUrl : undefined
-      );
+      const data = await inspectSource(node.subscriptionUrl, {
+        runProbe: false
+      });
+      setSourceInspect({
+        node,
+        status: "ready",
+        data,
+        error: null
+      });
+    } catch (error) {
+      setSourceInspect({
+        node,
+        status: "error",
+        data: null,
+        error: error instanceof Error ? error.message : "Failed to load source list."
+      });
+    }
+  };
+
+  const runSourceInspect = async (node: ProxyProviderNode) => {
+    setSourceInspect((current) => ({
+      node,
+      status: "loading",
+      data: current?.node.id === node.id ? current.data : null,
+      error: null
+    }));
+
+    try {
+      const data = await inspectSource(node.subscriptionUrl, {
+        runProbe: true,
+        probeUrl:
+          globalSettingsNode?.kind === "globalSettings"
+            ? globalSettingsNode.settings.healthCheckUrl
+            : undefined
+      });
       setSourceInspect({
         node,
         status: "ready",
@@ -826,8 +968,14 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
               className="panel-title-button"
               onClick={() => setYamlPreviewExpanded(true)}
             >
-              <h2>YAML Preview</h2>
-              <span>Open large view</span>
+              <h2>Published YAML Preview</h2>
+              <span>
+                {yamlPreviewStatus === "loading"
+                  ? "Refreshing..."
+                  : yamlPreviewStatus === "error"
+                    ? "Preview fallback"
+                    : "Open large view"}
+              </span>
             </button>
             <pre className="yaml-preview">{yamlPreview}</pre>
           </section>
@@ -877,7 +1025,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             aria-label="Expanded YAML preview"
           >
             <div className="yaml-preview-modal__header">
-              <h2>YAML Preview</h2>
+              <h2>Published YAML Preview</h2>
               <button
                 type="button"
                 className="ghost"
@@ -907,20 +1055,35 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
               <div>
                 <h2>{sourceInspect.node.label}</h2>
                 <p className="node-meta">
-                  Servers from source subscription. Ping is measured by running the current
-                  health-check URL through each proxy tunnel.
+                  Logical servers from the source subscription. Ping is measured by running the
+                  current health-check URL through each proxy tunnel, including detour when one is
+                  configured.
+                </p>
+                <p className="node-meta">
+                  The site shows logical tunnel servers. Clash itself still sees wire-level helper
+                  proxies because `dialer-proxy` requires real helper entries in the generated YAML.
                 </p>
               </div>
-              <button
-                type="button"
-                className="ghost"
-                onClick={() => setSourceInspect(null)}
-              >
-                Close
-              </button>
+              <div className="yaml-preview-modal__actions">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => void runSourceInspect(sourceInspect.node)}
+                  disabled={sourceInspect.status === "loading"}
+                >
+                  {sourceInspect.status === "loading" ? "Running probe..." : "Run probe"}
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => setSourceInspect(null)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
             {sourceInspect.status === "loading" ? (
-              <p>Loading servers and ping data...</p>
+              <p>{sourceInspect.data ? "Running probe..." : "Loading source servers..."}</p>
             ) : null}
             {sourceInspect.status === "error" ? (
               <p className="issue-text">{sourceInspect.error}</p>
@@ -928,7 +1091,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             {sourceInspect.status === "ready" && sourceInspect.data ? (
               <>
                 <p className="node-meta">
-                  {sourceInspect.data.total} servers
+                  {sourceInspect.data.total} logical servers
                   {sourceInspect.data.probeUrl ? ` • probe ${sourceInspect.data.probeUrl}` : ""}
                 </p>
                 <div className="source-inspect-grid">
@@ -942,6 +1105,12 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
                         <span className="source-inspect-card__type">{proxy.type}</span>
                       </div>
                       <div className="source-inspect-card__host">{proxy.server}:{proxy.port}</div>
+                      {proxy.detourServer ? (
+                        <div className="source-inspect-card__host source-inspect-card__host--secondary">
+                          Detour: {proxy.detourServer}:{proxy.detourPort}
+                          {proxy.detourType ? ` (${proxy.detourType})` : ""}
+                        </div>
+                      ) : null}
                       <div className="source-inspect-card__metrics">
                         <div>
                           <span className="source-inspect-card__metric-label">Probe</span>
@@ -1292,6 +1461,39 @@ const ProxyGroupFields = ({
       </label>
       {node.group.autoSelect ? (
       <>
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={node.group.customHealthCheckEnabled}
+            onChange={(event) =>
+              onChange({
+                ...node,
+                group: {
+                  ...node.group,
+                  customHealthCheckEnabled: event.target.checked
+                }
+              })
+            }
+          />
+          Custom ping URL
+        </label>
+        {node.group.customHealthCheckEnabled ? (
+          <label>
+            Ping URL
+            <input
+              value={node.group.customHealthCheckUrl}
+              onChange={(event) =>
+                onChange({
+                  ...node,
+                  group: {
+                    ...node.group,
+                    customHealthCheckUrl: event.target.value
+                  }
+                })
+              }
+            />
+          </label>
+        ) : null}
         <label>
           Ping threshold
           <input

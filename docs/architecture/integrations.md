@@ -28,4 +28,8 @@ The editor uses a thin Yandex Cloud Function bridge for private user workspaces,
 - weak hash-based client identity (`user name + short code`) for early-stage personal workspaces
 - stable published YAML identity for each workspace project
 - upstream formatter fetches go through a proxy defined in function environment, so provider formatting no longer depends on the client already having working proxies
-- source inspection runs in the cloud-function boundary and probes parsed proxies against the configured health-check URL
+- tunnel-style upstream subscriptions are normalized into one logical proxy per tunnel entry, with internal deterministic detour helpers kept behind `dialer-proxy`
+- source inspection runs in the cloud-function boundary and probes parsed logical proxies against the configured health-check URL while collapsing detour helpers into the parent card
+- opening source inspection loads logical proxies without probing by default; cloud probing starts only when the user explicitly requests it from the modal
+- published YAML can now be lazily refreshed on request; workspace-backed links reuse a 10-minute cache and materialize tunnel providers into static proxies before returning the config
+- the editor's explicit publish refresh now eagerly warms that same materialized YAML so the preview pane can mirror the exact text served by the stable client URL

@@ -305,7 +305,9 @@ export const projectToClashObject = (project: ConfigProject) => {
     };
 
     if (group.group.autoSelect) {
-      groupObject.url = globals?.settings.healthCheckUrl ?? "http://www.gstatic.com/generate_204";
+      groupObject.url = group.group.customHealthCheckEnabled
+        ? group.group.customHealthCheckUrl
+        : globals?.settings.healthCheckUrl ?? "http://www.gstatic.com/generate_204";
       groupObject.interval = group.group.interval;
       groupObject.tolerance = group.group.tolerance;
     }

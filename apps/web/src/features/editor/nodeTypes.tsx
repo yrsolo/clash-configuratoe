@@ -1,5 +1,6 @@
 import type { ConfigNode } from "@clash-configuratoe/schema";
-import { Handle, NodeResizeControl, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useReactFlow, type NodeProps } from "@xyflow/react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 
 type EditorData = {
   node: ConfigNode;
@@ -9,6 +10,8 @@ type EditorData = {
 type PanelData = {
   panel: { id: string; label: string; role: "generic" | "rulePanel"; enabled?: boolean };
   onToggleEnabled?: (panelId: string, nextEnabled: boolean) => void;
+  onResize?: (panelId: string, size: { width: number; height: number }) => void;
+  onResizeEnd?: (panelId: string, size: { width: number; height: number }) => void;
 };
 
 const kindTitles: Record<ConfigNode["kind"], string> = {
@@ -158,22 +161,60 @@ export const EditorNode = ({ data }: NodeProps) => {
   );
 };
 
-export const PanelNode = ({ data, selected }: NodeProps) => {
+export const PanelNode = ({ data, selected, width, height }: NodeProps) => {
   const payload = data as PanelData;
+  const reactFlow = useReactFlow();
+
+  const handleResizeStart = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (payload.panel.role !== "generic") {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startWidth = width ?? 240;
+    const startHeight = height ?? 180;
+    const startX = event.clientX;
+    const startY = event.clientY;
+
+    const handleMove = (moveEvent: MouseEvent) => {
+      const zoom = reactFlow.getZoom() || 1;
+      const nextWidth = Math.max(240, startWidth + (moveEvent.clientX - startX) / zoom);
+      const nextHeight = Math.max(180, startHeight + (moveEvent.clientY - startY) / zoom);
+      payload.onResize?.(payload.panel.id, {
+        width: nextWidth,
+        height: nextHeight
+      });
+    };
+
+    const handleEnd = (endEvent: MouseEvent) => {
+      const zoom = reactFlow.getZoom() || 1;
+      const nextWidth = Math.max(240, startWidth + (endEvent.clientX - startX) / zoom);
+      const nextHeight = Math.max(180, startHeight + (endEvent.clientY - startY) / zoom);
+      payload.onResizeEnd?.(payload.panel.id, {
+        width: nextWidth,
+        height: nextHeight
+      });
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd, { once: true });
+  };
 
   return (
     <div
       className={`rule-panel-node ${payload.panel.enabled === false ? "rule-panel-node--disabled" : ""}`}
     >
       {payload.panel.role === "generic" ? (
-        <NodeResizeControl
-          className={`rule-panel-node__resize ${selected ? "rule-panel-node__resize--selected" : ""}`}
-          position="bottom-right"
-          minWidth={240}
-          minHeight={180}
+        <div
+          className={`rule-panel-node__resize nodrag nopan ${selected ? "rule-panel-node__resize--selected" : ""}`}
+          onMouseDown={handleResizeStart}
         >
           <div className="rule-panel-node__resize-grip" />
-        </NodeResizeControl>
+        </div>
       ) : null}
       {payload.panel.role === "rulePanel" ? (
         <Handle

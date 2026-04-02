@@ -3,6 +3,9 @@ export type SourceInspectProxy = {
   type: string;
   server: string;
   port: number;
+  detourServer: string | null;
+  detourPort: number | null;
+  detourType: string | null;
   pingMs: number | null;
   status: string;
 };
@@ -14,7 +17,13 @@ export type SourceInspectResult = {
   proxies: SourceInspectProxy[];
 };
 
-export const inspectSource = async (subscriptionUrl: string, probeUrl?: string) => {
+export const inspectSource = async (
+  subscriptionUrl: string,
+  options?: {
+    probeUrl?: string;
+    runProbe?: boolean;
+  }
+) => {
   const response = await fetch("/api/source/inspect", {
     method: "POST",
     headers: {
@@ -22,7 +31,8 @@ export const inspectSource = async (subscriptionUrl: string, probeUrl?: string) 
     },
     body: JSON.stringify({
       url: subscriptionUrl,
-      probeUrl
+      probeUrl: options?.probeUrl,
+      runProbe: options?.runProbe ?? false
     })
   });
   if (!response.ok) {

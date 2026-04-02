@@ -9,6 +9,17 @@ The app edits a `ConfigProject` document with:
 - `canvasGroups`: visual panels on the editor canvas
 - `meta`: version and editor metadata
 
+Current canvas-group roles:
+
+- `generic` - free-form visual panel with persisted size and optional child-drag behavior
+- `rulePanel` - compact rule container whose child rules are auto-packed and exposed through one shared output
+
+Notable current fields inside node payloads include:
+
+- global formatter URL and global health-check URL on `globalSettings`
+- optional per-group `customHealthCheckEnabled` and `customHealthCheckUrl` on `proxyGroup`
+- provider `formatter.enabled` plus secret-bearing subscription URLs stored outside project JSON for workspace persistence
+
 The default starter project used by the web app lives in [default/new.json](/n:/PROJECTS/service/clash-configuratoe/default/new.json).
 
 ## Supported Node Kinds
@@ -39,6 +50,8 @@ Generated Clash YAML includes:
 - `proxies`
 - `proxy-groups`
 - `rules`
+
+When the published server output is materialized for workspace-backed links, provider-backed sources may be expanded into static `proxies:` so the served YAML can preserve `dialer-proxy` chains while keeping helper proxies out of group membership.
 
 ## Import Rules
 

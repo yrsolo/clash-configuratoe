@@ -83,6 +83,8 @@ export const proxyGroupNodeSchema = z.object({
     includeDirect: z.boolean().default(true),
     autoSelect: z.boolean().default(false),
     catchAll: z.boolean().default(false),
+    customHealthCheckEnabled: z.boolean().default(false),
+    customHealthCheckUrl: z.string().default("http://www.gstatic.com/generate_204"),
     interval: z.number().int().positive().default(300),
     tolerance: z.number().int().positive().default(300)
   })

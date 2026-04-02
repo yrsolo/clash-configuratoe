@@ -13,12 +13,14 @@ Editing large Clash configs by hand is slow, error-prone, and hard to explain to
 ## Core Capabilities
 
 - Node-based editor for providers, proxies, groups, rules, and visual canvas panels
+- Two panel modes on the canvas: free-form visual panels and auto-packing rule panels
 - Canonical JSON project model with lossless editor metadata
 - JSON export for lossless project backup and transfer
 - Clash YAML export and best-effort Clash YAML import
 - Stable published YAML links for workspace projects, plus guest snapshot publish links and QR codes
 - Lightweight hash-based personal workspaces backed by a serverless storage bridge
 - Same-origin formatter and source inspection routes behind the Yandex gateway
+- Eager server-side publish refresh so the stable YAML link and the on-page preview reflect the warmed materialized config
 - Built-in starter presets and local draft autosave
 
 ## Quick Start
@@ -61,4 +63,4 @@ Start here:
 
 ## Status
 
-Feature development is currently paused. The repository should be treated as a working MVP baseline with a live editor, serverless workspace/publish bridge, same-origin formatter, and cloud-side source inspection. The main remaining gaps are product hardening and stronger auth, not missing core editor infrastructure.
+Feature development is currently paused. The repository should be treated as a working MVP baseline with a live editor, visual and rule panels, a serverless workspace/publish bridge, a same-origin formatter, and cloud-side source inspection. The main remaining gaps are product hardening and stronger auth, not missing core editor infrastructure.
