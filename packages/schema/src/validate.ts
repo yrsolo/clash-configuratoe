@@ -6,6 +6,7 @@ const sourceFlowTargets = new Set(["sourceMerge", "proxyGroup"]);
 const sourceFlowSources = new Set([
   "proxyProvider",
   "manualProxy",
+  "vlessProxy",
   "sourceMerge",
   "proxyGroup"
 ]);
@@ -27,6 +28,13 @@ export const validateProject = (project: ConfigProject): string[] => {
         issues.push(`Duplicate proxy name: ${node.proxy.name}`);
       }
       names.add(node.proxy.name);
+    }
+
+    if (node.kind === "vlessProxy") {
+      const name = getVlessProxyName(node.vlessUrl) ?? node.label;
+      if (names.has(name)) issues.push(`Duplicate proxy name: ${name}`);
+      names.add(name);
+      if (!getVlessProxyName(node.vlessUrl)) issues.push(`VLESS node "${node.label}" has an invalid URI.`);
     }
 
     if (node.kind === "proxyGroup") {
@@ -115,7 +123,7 @@ export const validateProject = (project: ConfigProject): string[] => {
         (edge) => edge.kind === "group-source" && edge.target === node.id
       );
 
-      if (!hasIncomingSource) {
+      if (!hasIncomingSource && !node.group.includeDirect) {
         issues.push(`Proxy group "${node.group.name}" has no connected sources.`);
       }
     }
@@ -148,6 +156,15 @@ export const validateProject = (project: ConfigProject): string[] => {
   }
 
   return Array.from(new Set(issues));
+};
+
+const getVlessProxyName = (link: string) => {
+  try {
+    const url = new URL(link);
+    return url.protocol === "vless:" && url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
+  } catch {
+    return null;
+  }
 };
 
 export const canConnectNodes = (source: ConfigNode, target: ConfigNode): GraphEdge["kind"] | null => {

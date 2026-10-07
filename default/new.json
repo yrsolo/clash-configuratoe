@@ -1,174 +1,182 @@
 {
-  "id": "",
-  "name": "NEW",
-  "description": "",
+  "id": "starter-project",
+  "name": "Starter — свои подписки",
+  "description": "Группы и правила на основе конфигурации владельца. Все источники выключены; заполните свои подписки и включите нужные источники.",
   "nodes": [
     {
-      "id": "d98e79c5-3f1b-4b8c-96e3-9765eea7cc34",
+      "id": "globalSettings-1",
+      "kind": "globalSettings",
       "label": "Global Settings",
       "position": {
-        "x": -488.61058775120614,
-        "y": -139.42972757162818
+        "x": -609.4843307147269,
+        "y": -248.90430096531998
       },
       "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
-      "kind": "globalSettings",
+      "canvasGroupId": "panel-4",
       "settings": {
         "sourceUpdateInterval": 3600,
         "sourceHealthCheckInterval": 600,
-        "healthCheckUrl": "http://www.gstatic.com/generate_204",
-        "formatterUrl": "https://clash.solofarm.ru/api/formatter"
+        "healthCheckUrl": "http://www.gstatic.com/generate_204"
       }
     },
     {
-      "id": "a4f9b54e-2577-47aa-bebe-a6b9fcbf5b67",
-      "label": "lib_json",
+      "id": "proxyProvider-2",
+      "kind": "proxyProvider",
+      "label": "Subscription 1",
       "position": {
-        "x": -465.69968121249826,
-        "y": 195.19240912905215
+        "x": -628.9677281339998,
+        "y": 103.0600470195844
       },
       "enabled": false,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
-      "kind": "proxyProvider",
-      "providerKey": "lib_auto",
+      "canvasGroupId": "panel-4",
+      "providerKey": "source_1",
       "sourceType": "http",
-      "subscriptionUrl": "https://connliberty.com/connection/tunnel/23213932-1a03-4c0e-b80b-51ae3384edc7",
-      "resolverMode": "stub",
+      "subscriptionUrl": "https://subscription.invalid/replace-source-1",
+      "resolverMode": "serverless",
       "interval": 3600,
-      "path": "./lib_auto.yaml",
+      "path": "./source_1.yaml",
       "healthCheck": {
         "enable": true,
         "interval": 600,
         "url": "http://www.gstatic.com/generate_204"
       },
       "formatter": {
-        "enabled": true
+        "enabled": true,
+        "sourceFormat": "clash"
       }
     },
     {
-      "id": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
-      "label": "Personal_HTTP",
-      "position": {
-        "x": -471.23702268833745,
-        "y": 314.68451181406493
-      },
-      "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "id": "manualProxy-3",
       "kind": "manualProxy",
+      "label": "Optional HTTP proxy",
+      "position": {
+        "x": -629.4847885502716,
+        "y": 389.09069099305844
+      },
+      "enabled": false,
+      "canvasGroupId": "panel-4",
       "proxy": {
-        "name": "Personal_HTTP",
+        "name": "Optional_HTTP",
         "type": "http",
-        "server": "111.111.111.11",
-        "port": 8000,
-        "username": "",
-        "password": ""
+        "server": "proxy.invalid",
+        "port": 8080
       }
     },
     {
-      "id": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "id": "proxyGroup-4",
+      "kind": "proxyGroup",
       "label": "AI_SERVICES",
       "position": {
-        "x": 567.7852624967785,
-        "y": -198.6863118354889
+        "x": 250.53984781460738,
+        "y": -258.18636541021846
       },
       "enabled": true,
-      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
-      "kind": "proxyGroup",
+      "canvasGroupId": "panel-5",
       "group": {
         "name": "🤖 AI_SERVICES",
         "includeDirect": true,
         "autoSelect": false,
         "catchAll": false,
+        "customHealthCheckEnabled": false,
+        "customHealthCheckUrl": "http://www.gstatic.com/generate_204",
         "interval": 300,
         "tolerance": 300
       }
     },
     {
-      "id": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "id": "proxyGroup-5",
+      "kind": "proxyGroup",
       "label": "VIDEO_CONTENT",
       "position": {
-        "x": 566.6654764020733,
-        "y": -12.778985587494425
+        "x": 251.9338207154905,
+        "y": -113.14793393800998
       },
       "enabled": true,
-      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
-      "kind": "proxyGroup",
+      "canvasGroupId": "panel-5",
       "group": {
         "name": "📺 VIDEO_CONTENT",
         "includeDirect": true,
         "autoSelect": false,
         "catchAll": false,
+        "customHealthCheckEnabled": false,
+        "customHealthCheckUrl": "http://www.gstatic.com/generate_204",
         "interval": 300,
         "tolerance": 300
       }
     },
     {
-      "id": "f6e41bdd-4535-4b8f-9897-72b69f211338",
+      "id": "proxyGroup-6",
+      "kind": "proxyGroup",
       "label": "TORRENTS",
       "position": {
-        "x": 538.0226441433396,
-        "y": 349.6081986783747
+        "x": 236.63301580889544,
+        "y": 173.6996434903127
       },
       "enabled": true,
-      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
-      "kind": "proxyGroup",
+      "canvasGroupId": "panel-5",
       "group": {
         "name": "🏴‍☠️ TORRENTS",
         "includeDirect": true,
         "autoSelect": false,
         "catchAll": false,
+        "customHealthCheckEnabled": false,
+        "customHealthCheckUrl": "http://www.gstatic.com/generate_204",
         "interval": 300,
         "tolerance": 300
       }
     },
     {
-      "id": "f48f0a86-98a9-49f1-8c56-8f6af5c56a0b",
+      "id": "proxyGroup-7",
+      "kind": "proxyGroup",
       "label": "TELEGA",
       "position": {
-        "x": 549.916152517118,
-        "y": 182.85462466442945
+        "x": 242.20262229643606,
+        "y": 26.340672586706503
       },
       "enabled": true,
-      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
-      "kind": "proxyGroup",
+      "canvasGroupId": "panel-5",
       "group": {
         "name": "📢 TELEGA",
-        "includeDirect": false,
-        "autoSelect": true,
+        "includeDirect": true,
+        "autoSelect": false,
         "catchAll": false,
+        "customHealthCheckEnabled": true,
+        "customHealthCheckUrl": "https://telegram.org/",
         "interval": 300,
-        "tolerance": 300
+        "tolerance": 600
       }
     },
     {
-      "id": "c2021ded-75a3-4170-80de-863fc48893f0",
+      "id": "proxyGroup-8",
+      "kind": "proxyGroup",
       "label": "REST_OF_WORLD",
       "position": {
-        "x": 521.8906124397279,
-        "y": 527.2990667754239
+        "x": 231.27590677992922,
+        "y": 316.92420963598994
       },
       "enabled": true,
-      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
-      "kind": "proxyGroup",
+      "canvasGroupId": "panel-5",
       "group": {
         "name": "🌍 REST_OF_WORLD",
         "includeDirect": true,
         "autoSelect": false,
         "catchAll": true,
+        "customHealthCheckEnabled": false,
+        "customHealthCheckUrl": "http://www.gstatic.com/generate_204",
         "interval": 300,
         "tolerance": 300
       }
     },
     {
-      "id": "8bba89c1-f744-43b4-b761-181aa5dd1c26",
+      "id": "ruleSet-9",
+      "kind": "ruleSet",
       "label": "YandexD+local",
       "position": {
         "x": 1179.3193018784607,
         "y": 801.7435003848672
       },
       "enabled": true,
-      "canvasGroupId": "dc3b84f8-fc4c-4b04-88e9-efc1e3156fbf",
-      "kind": "ruleSet",
+      "canvasGroupId": "panel-2",
       "ruleSet": {
         "visibleSections": [
           "domainSuffixes",
@@ -191,22 +199,28 @@
           "YandexDisk.exe"
         ],
         "ipCidrs": [
-          "127.0.0.0/8"
+          "127.0.0.0/8",
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16",
+          "::1/128",
+          "fc00::/7",
+          "fe80::/10"
         ],
         "rawRules": [],
         "match": false
       }
     },
     {
-      "id": "b10624f1-9860-4a23-9d3b-cf8c813cc23a",
+      "id": "ruleSet-10",
+      "kind": "ruleSet",
       "label": "🤖 AI_SERVICES",
       "position": {
         "x": 1122.3574276527331,
         "y": -103.96523311897099
       },
       "enabled": true,
-      "canvasGroupId": "a8754dd4-96ae-4d93-86db-f75a860f0f6b",
-      "kind": "ruleSet",
+      "canvasGroupId": "panel-1",
       "ruleSet": {
         "visibleSections": [
           "domainSuffixes"
@@ -216,6 +230,7 @@
         "domains": [],
         "domainSuffixes": [
           "openai.com",
+          "auth.openai.com",
           "gemini.google.com",
           "claude.ai",
           "claude.com",
@@ -235,14 +250,15 @@
       }
     },
     {
-      "id": "a49c3d9a-1fd2-473d-8127-50c7ce652204",
+      "id": "ruleSet-11",
+      "kind": "ruleSet",
       "label": "📢 TELEGA",
       "position": {
-        "x": 1115.4707078995255,
-        "y": 335.4736704283455
+        "x": 1797.6438107935428,
+        "y": 140.09816111603283
       },
-      "enabled": true,
-      "kind": "ruleSet",
+      "enabled": false,
+      "canvasGroupId": "panel-6",
       "ruleSet": {
         "visibleSections": [
           "domainSuffixes",
@@ -259,9 +275,7 @@
           "t.me",
           "telegram.me",
           "tx.me",
-          "telegram.org",
-          "telegram.com",
-          "t.me"
+          "telegram.com"
         ],
         "domainKeywords": [],
         "geosites": [
@@ -287,15 +301,15 @@
       }
     },
     {
-      "id": "18e201d3-9e10-4128-af51-9cf892f030b5",
+      "id": "ruleSet-12",
+      "kind": "ruleSet",
       "label": "FB+INST",
       "position": {
         "x": 1258.7292859272368,
         "y": 119.21972589006558
       },
       "enabled": true,
-      "canvasGroupId": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
-      "kind": "ruleSet",
+      "canvasGroupId": "panel-3",
       "ruleSet": {
         "visibleSections": [
           "domainSuffixes",
@@ -315,12 +329,7 @@
           "facebook.net",
           "fbcdn.net",
           "fbsbx.com",
-          "instagram.com",
-          "cdninstagram.com",
-          "facebook.com",
           "fb.com",
-          "fbcdn.net",
-          "fbsbx.com",
           "meta.com",
           "x.com"
         ],
@@ -351,24 +360,25 @@
       }
     },
     {
-      "id": "6f7fa62d-a168-4f6a-889c-1cef5a6354ec",
-      "label": "🏴‍☠️ TORRENTS",
+      "id": "ruleSet-13",
+      "kind": "ruleSet",
+      "label": "🏴‍☠️ TORRENTS SITE",
       "position": {
-        "x": 1108.9626637570952,
-        "y": 488.1034635575521
+        "x": 1404.2443858522909,
+        "y": 88.67693265814555
       },
       "enabled": true,
-      "kind": "ruleSet",
       "ruleSet": {
         "visibleSections": [
           "domainSuffixes",
           "processNames"
         ],
-        "name": "🏴‍☠️ TORRENTS",
+        "name": "🏴‍☠️ TORRENTS SITE",
         "first": false,
         "domains": [],
         "domainSuffixes": [
-          "rutracker.org"
+          "rutracker.org",
+          "nnmclub.to"
         ],
         "domainKeywords": [],
         "geosites": [],
@@ -380,14 +390,14 @@
       }
     },
     {
-      "id": "34015a7c-913b-46cd-a0d2-16ac792e6e8c",
+      "id": "ruleSet-14",
+      "kind": "ruleSet",
       "label": "🌍 REST_OF_WORLD",
       "position": {
-        "x": 1117.7101835290755,
-        "y": 624.2066611133041
+        "x": 995.4469991181475,
+        "y": 275.5339648344033
       },
       "enabled": true,
-      "kind": "ruleSet",
       "ruleSet": {
         "visibleSections": [
           "match"
@@ -406,34 +416,36 @@
       }
     },
     {
-      "id": "c7eb0822-0a3d-45dd-98b3-593085ad5c27",
+      "id": "proxyGroup-15",
+      "kind": "proxyGroup",
       "label": "DIR",
       "position": {
-        "x": 539.9222083719164,
-        "y": 715.7674477815833
+        "x": 229.60052255631868,
+        "y": 638.6703821695149
       },
       "enabled": true,
-      "canvasGroupId": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
-      "kind": "proxyGroup",
+      "canvasGroupId": "panel-5",
       "group": {
         "name": "DIR",
         "includeDirect": true,
         "autoSelect": false,
         "catchAll": false,
+        "customHealthCheckEnabled": false,
+        "customHealthCheckUrl": "http://www.gstatic.com/generate_204",
         "interval": 300,
         "tolerance": 300
       }
     },
     {
-      "id": "b98c9675-88de-4886-81ed-43a74f8e2790",
+      "id": "sourceMerge-16",
+      "kind": "sourceMerge",
       "label": "Merge",
       "position": {
-        "x": -74.56903008269484,
-        "y": 362.3276111046703
+        "x": -190.8116366625153,
+        "y": 280.8204742985426
       },
       "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
-      "kind": "sourceMerge",
+      "canvasGroupId": "panel-4",
       "merge": {
         "strategy": "combine",
         "filterEnabled": false,
@@ -442,36 +454,37 @@
       }
     },
     {
-      "id": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
+      "id": "sourceMerge-17",
+      "kind": "sourceMerge",
       "label": "RU",
       "position": {
-        "x": -83.79201250156149,
-        "y": 231.2426193593647
+        "x": -200.03461908138195,
+        "y": 149.73548255323698
       },
       "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
-      "kind": "sourceMerge",
+      "canvasGroupId": "panel-4",
       "merge": {
         "strategy": "combine",
         "filterEnabled": true,
         "filterTerms": [
           "Россия",
           "Russia",
-          "RU"
+          "RU",
+          "Torrent"
         ],
         "invert": true
       }
     },
     {
-      "id": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
+      "id": "sourceMerge-18",
+      "kind": "sourceMerge",
       "label": "NATO+prox",
       "position": {
-        "x": -61.18576318379493,
-        "y": -17.750099450865264
+        "x": -192.67792698648913,
+        "y": -82.4827233118322
       },
       "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
-      "kind": "sourceMerge",
+      "canvasGroupId": "panel-4",
       "merge": {
         "strategy": "combine",
         "filterEnabled": true,
@@ -484,15 +497,15 @@
       }
     },
     {
-      "id": "32f951ee-60a5-43b3-826e-b8ec0a2d161c",
+      "id": "ruleSet-19",
+      "kind": "ruleSet",
       "label": "📺 VIDEO_CONTENT",
       "position": {
-        "x": 1107.9809010783465,
-        "y": 194.43217934314035
+        "x": 1489.0900696463518,
+        "y": 187.17120772761493
       },
       "enabled": true,
-      "canvasGroupId": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
-      "kind": "ruleSet",
+      "canvasGroupId": "panel-3",
       "ruleSet": {
         "visibleSections": [
           "domainSuffixes",
@@ -519,190 +532,925 @@
       }
     },
     {
-      "id": "bc8afd89-7c52-4a7c-9e63-21928b0b0da1",
+      "id": "sourceMerge-20",
+      "kind": "sourceMerge",
       "label": "NATO",
       "position": {
-        "x": -61.017300779886085,
-        "y": 96.0698036738275
+        "x": -193.1484582523368,
+        "y": 27.923213086992973
       },
       "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
-      "kind": "sourceMerge",
+      "canvasGroupId": "panel-4",
       "merge": {
         "strategy": "combine",
         "filterEnabled": true,
         "filterTerms": [
           "Россия",
           "Russia",
-          "RU"
+          "RU",
+          "Torrent"
         ],
         "invert": false
       }
     },
     {
-      "id": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
-      "label": "VLESS",
-      "position": {
-        "x": -463.9930041512582,
-        "y": 68.93824788832774
-      },
-      "enabled": true,
-      "canvasGroupId": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "id": "proxyProvider-21",
       "kind": "proxyProvider",
-      "providerKey": "vless",
+      "label": "Subscription 2",
+      "position": {
+        "x": -625.5718748170043,
+        "y": -1.2348228963188603
+      },
+      "enabled": false,
+      "canvasGroupId": "panel-4",
+      "providerKey": "source_2",
       "sourceType": "http",
-      "subscriptionUrl": "https://workspace.invalid/subscription",
-      "resolverMode": "stub",
+      "subscriptionUrl": "https://subscription.invalid/replace-source-2",
+      "resolverMode": "serverless",
       "interval": 3600,
-      "path": "./lib_auto.yaml",
+      "path": "./source_2.yaml",
       "healthCheck": {
         "enable": true,
         "interval": 600,
         "url": "http://www.gstatic.com/generate_204"
       },
       "formatter": {
-        "enabled": true
+        "enabled": true,
+        "sourceFormat": "clash"
+      }
+    },
+    {
+      "id": "ruleSet-22",
+      "kind": "ruleSet",
+      "label": "Telegram",
+      "position": {
+        "x": 1735.307531126941,
+        "y": 87.41877693195664
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-6",
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "geosites",
+          "geoips",
+          "processNames",
+          "rawRules"
+        ],
+        "name": "Telegram",
+        "first": false,
+        "domains": [
+          "t.me",
+          "telegram.me",
+          "web.telegram.org",
+          "desktop.telegram.org"
+        ],
+        "domainSuffixes": [
+          "telegram.org",
+          "telegra.ph",
+          "telesco.pe",
+          "tx.me"
+        ],
+        "domainKeywords": [
+          "telegram",
+          "telegra"
+        ],
+        "geosites": [
+          "telegram"
+        ],
+        "geoips": [
+          "telegram"
+        ],
+        "processNames": [
+          "Telegram.exe",
+          "telegram.exe",
+          "telegram-desktop.exe",
+          "org.telegram.messenger",
+          "org.thunderdog.challegram"
+        ],
+        "ipCidrs": [],
+        "rawRules": [
+          "IP-ASN,62041",
+          "IP-ASN,59930",
+          "IP-ASN,44907",
+          "IP-ASN,211157"
+        ],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-23",
+      "kind": "ruleSet",
+      "label": "YouTube",
+      "position": {
+        "x": 1411.42815207852,
+        "y": -201.61690027588162
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-3",
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "geosites",
+          "processNames"
+        ],
+        "name": "YouTube",
+        "first": false,
+        "domains": [
+          "youtu.be",
+          "youtubei.googleapis.com",
+          "yt3.ggpht.com",
+          "i.ytimg.com"
+        ],
+        "domainSuffixes": [
+          "youtube.com",
+          "googlevideo.com",
+          "youtube-nocookie.com",
+          "ytimg.com",
+          "ggpht.com",
+          "ytimg.l.google.com"
+        ],
+        "domainKeywords": [
+          "youtube",
+          "ytimg",
+          "googlevideo",
+          "youtubei"
+        ],
+        "geosites": [
+          "youtube"
+        ],
+        "geoips": [],
+        "processNames": [
+          "YouTube.exe",
+          "com.google.android.youtube",
+          "YouTube Music.exe",
+          "com.google.android.apps.youtube.music"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-24",
+      "kind": "ruleSet",
+      "label": "Meta",
+      "position": {
+        "x": 1473.1801483783975,
+        "y": 211.25612620178362
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-3",
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "geosites",
+          "geoips",
+          "processNames"
+        ],
+        "name": "Meta",
+        "first": false,
+        "domains": [
+          "facebook.com",
+          "m.facebook.com",
+          "mbasic.facebook.com",
+          "instagram.com",
+          "www.instagram.com",
+          "threads.net"
+        ],
+        "domainSuffixes": [
+          "facebook.com",
+          "facebook.net",
+          "fbcdn.net",
+          "fbsbx.com",
+          "messenger.com",
+          "instagram.com",
+          "cdninstagram.com",
+          "threads.net",
+          "meta.com"
+        ],
+        "domainKeywords": [
+          "facebook",
+          "instagram",
+          "threads",
+          "messenger"
+        ],
+        "geosites": [
+          "facebook",
+          "instagram"
+        ],
+        "geoips": [
+          "facebook"
+        ],
+        "processNames": [
+          "Facebook.exe",
+          "Instagram.exe",
+          "Messenger.exe",
+          "com.facebook.katana",
+          "com.facebook.orca",
+          "com.instagram.android",
+          "com.threadsapp"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-25",
+      "kind": "ruleSet",
+      "label": "AI",
+      "position": {
+        "x": 1077.5943643250678,
+        "y": -201.91061074472583
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-1",
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "processNames"
+        ],
+        "name": "AI",
+        "first": false,
+        "domains": [
+          "chatgpt.com",
+          "gemini.google.com",
+          "notebooklm.google.com",
+          "claude.ai",
+          "claude.com",
+          "poe.com",
+          "perplexity.ai",
+          "copilot.microsoft.com"
+        ],
+        "domainSuffixes": [
+          "openai.com",
+          "oaistatic.com",
+          "oaiusercontent.com",
+          "chatgpt.com",
+          "claude.ai",
+          "claude.com",
+          "anthropic.com",
+          "notebooklm.google.com",
+          "generativelanguage.googleapis.com",
+          "deepmind.google",
+          "perplexity.ai",
+          "poe.com",
+          "cursor.sh",
+          "cursor.com",
+          "copilot.microsoft.com",
+          "githubcopilot.com",
+          "x.ai",
+          "grok.com"
+        ],
+        "domainKeywords": [
+          "openai",
+          "anthropic",
+          "chatgpt",
+          "claude",
+          "gemini",
+          "notebooklm",
+          "perplexity",
+          "copilot",
+          "cursor",
+          "grok"
+        ],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [
+          "ChatGPT.exe",
+          "Claude.exe",
+          "Cursor.exe",
+          "Trae.exe",
+          "com.openai.chatgpt",
+          "com.anthropic.claude",
+          "com.perplexity.app"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-26",
+      "kind": "ruleSet",
+      "label": "Russian Banks",
+      "position": {
+        "x": 1326.0261878618116,
+        "y": 390.66956530294453
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-2",
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "processNames"
+        ],
+        "name": "Russian Banks",
+        "first": true,
+        "domains": [
+          "online.sberbank.ru",
+          "alfabank.ru",
+          "tbank.ru",
+          "vtb.ru",
+          "dom.gosuslugi.ru"
+        ],
+        "domainSuffixes": [
+          "sberbank.ru",
+          "sberbank.com",
+          "alfabank.ru",
+          "tbank.ru",
+          "tinkoff.ru",
+          "vtb.ru",
+          "gazprombank.ru",
+          "raiffeisen.ru",
+          "rsb.ru",
+          "sovcombank.ru",
+          "psbank.ru",
+          "otpbank.ru",
+          "banki.ru"
+        ],
+        "domainKeywords": [
+          "sber",
+          "alfa",
+          "tinkoff",
+          "tbank",
+          "vtb",
+          "gazprombank",
+          "bank"
+        ],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [
+          "SberbankOnline.exe",
+          "SberBank.exe",
+          "TBank.exe",
+          "Tinkoff.exe",
+          "AlfaBank.exe",
+          "VTB.exe",
+          "ru.sberbankmobile",
+          "ru.tinkoff.mb",
+          "ru.alfabank.mobile.android",
+          "ru.vtb24.mobilebanking.android"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-27",
+      "kind": "ruleSet",
+      "label": "Russian Services",
+      "position": {
+        "x": 1846.295348223442,
+        "y": 429.316220805361
+      },
+      "enabled": false,
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "geosites",
+          "processNames"
+        ],
+        "name": "Russian Services",
+        "first": true,
+        "domains": [
+          "www.gosuslugi.ru",
+          "www.avito.ru",
+          "rutube.ru",
+          "vk.com",
+          "ok.ru"
+        ],
+        "domainSuffixes": [
+          "gosuslugi.ru",
+          "esia.gosuslugi.ru",
+          "avito.ru",
+          "rutube.ru",
+          "vk.com",
+          "vk.ru",
+          "userapi.com",
+          "mycdn.me",
+          "ok.ru",
+          "dzen.ru",
+          "ya.ru",
+          "yandex.ru",
+          "yandex.net"
+        ],
+        "domainKeywords": [
+          "gosuslugi",
+          "avito",
+          "rutube",
+          "vk",
+          "vkontakte",
+          "dzen",
+          "yandex"
+        ],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [
+          "Avito.exe",
+          "VK.exe",
+          "Rutube.exe",
+          "Yandex.exe",
+          "ru.gosuslugi.pos",
+          "com.vkontakte.android",
+          "com.avito.android",
+          "ru.rutube.app"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-28",
+      "kind": "ruleSet",
+      "label": "tailscale",
+      "position": {
+        "x": 1461.8145164480666,
+        "y": 790.741397013288
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-2",
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "ipCidrs",
+          "rawRules"
+        ],
+        "name": "tailscale",
+        "first": true,
+        "domains": [],
+        "domainSuffixes": [],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [],
+        "ipCidrs": [],
+        "rawRules": [
+          "IP-CIDR,100.64.0.0/10"
+        ],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-29",
+      "kind": "ruleSet",
+      "label": "Russian Services",
+      "position": {
+        "x": 1331.3208264905102,
+        "y": 481.4822323487521
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-2",
+      "ruleSet": {
+        "visibleSections": [
+          "domains",
+          "domainSuffixes",
+          "domainKeywords",
+          "geoips",
+          "processNames"
+        ],
+        "name": "Russian Services",
+        "first": true,
+        "domains": [
+          "www.gosuslugi.ru",
+          "www.avito.ru",
+          "www.ozon.ru",
+          "www.wildberries.ru",
+          "rutube.ru",
+          "vk.com",
+          "ok.ru"
+        ],
+        "domainSuffixes": [
+          "gosuslugi.ru",
+          "esia.gosuslugi.ru",
+          "avito.ru",
+          "ozon.ru",
+          "ozonusercontent.com",
+          "ozoncdn.ru",
+          "wildberries.ru",
+          "wb.ru",
+          "wbx-content-v2.wbstatic.net",
+          "wbstatic.net",
+          "wbxst.ru",
+          "rutube.ru",
+          "vk.com",
+          "vk.ru",
+          "userapi.com",
+          "mycdn.me",
+          "ok.ru",
+          "dzen.ru",
+          "ya.ru",
+          "yandex.ru",
+          "yandex.net"
+        ],
+        "domainKeywords": [
+          "gosuslugi",
+          "avito",
+          "ozon",
+          "wildberries",
+          "wbpay",
+          "rutube",
+          "vk",
+          "vkontakte",
+          "mirpay",
+          "mosmetro",
+          "cppk",
+          "russianpost",
+          "pochta",
+          "cdek",
+          "dzen",
+          "yandex"
+        ],
+        "geosites": [],
+        "geoips": [
+          "ru"
+        ],
+        "processNames": [
+          "Avito.exe",
+          "Ozon.exe",
+          "Wildberries.exe",
+          "MirPay.exe",
+          "MetroMoscow.exe",
+          "CPPK.exe",
+          "RussianPost.exe",
+          "CDEK.exe",
+          "VK.exe",
+          "Rutube.exe",
+          "Yandex.exe",
+          "ru.gosuslugi.pos",
+          "ru.ozon.app.android",
+          "com.wildberries.ru",
+          "ru.nspk.mirpay",
+          "ru.mosmetro.metro",
+          "io.itforces.android.timetable",
+          "com.octopod.russianpost.client.android",
+          "com.vkontakte.android",
+          "com.avito.android",
+          "ru.rutube.app"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "ruleSet-30",
+      "kind": "ruleSet",
+      "label": "higgsfield",
+      "position": {
+        "x": 985.0018357284921,
+        "y": 447.6816454502565
+      },
+      "enabled": false,
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes"
+        ],
+        "name": "higgsfield",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [
+          "higgsfield.ai"
+        ],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "proxyGroup-31",
+      "kind": "proxyGroup",
+      "label": "higgsfield_ai",
+      "position": {
+        "x": 224.5776076494433,
+        "y": 469.42797149173333
+      },
+      "enabled": true,
+      "canvasGroupId": "panel-5",
+      "group": {
+        "name": "higgsfield.ai",
+        "includeDirect": true,
+        "autoSelect": false,
+        "catchAll": false,
+        "customHealthCheckEnabled": false,
+        "customHealthCheckUrl": "http://www.gstatic.com/generate_204",
+        "interval": 300,
+        "tolerance": 300
+      }
+    },
+    {
+      "id": "vlessProxy-32",
+      "kind": "vlessProxy",
+      "label": "Optional VLESS Reality",
+      "position": {
+        "x": -630.7633848406165,
+        "y": -135.70521437821006
+      },
+      "enabled": false,
+      "canvasGroupId": "panel-4",
+      "vlessUrl": "vless://00000000-0000-0000-0000-000000000000@proxy.invalid:443?security=reality&type=tcp&fp=chrome&pbk=replace-me&sni=example.com#Optional_VLESS"
+    },
+    {
+      "id": "proxyProvider-33",
+      "kind": "proxyProvider",
+      "label": "Subscription 3",
+      "position": {
+        "x": -625.9086645140858,
+        "y": 210.4373189131719
+      },
+      "enabled": false,
+      "canvasGroupId": "panel-4",
+      "providerKey": "source_3",
+      "sourceType": "http",
+      "subscriptionUrl": "https://subscription.invalid/replace-source-3",
+      "resolverMode": "serverless",
+      "interval": 3600,
+      "path": "./source_3.yaml",
+      "healthCheck": {
+        "enable": true,
+        "interval": 600,
+        "url": "http://www.gstatic.com/generate_204"
+      },
+      "formatter": {
+        "enabled": true,
+        "sourceFormat": "clash"
+      }
+    },
+    {
+      "id": "ruleSet-34",
+      "kind": "ruleSet",
+      "label": "🏴‍☠️ TORRENTS TRAF",
+      "position": {
+        "x": 1401.761738820222,
+        "y": 225.05798897603796
+      },
+      "enabled": true,
+      "ruleSet": {
+        "visibleSections": [
+          "domainSuffixes",
+          "processNames"
+        ],
+        "name": "🏴‍☠️ TORRENTS TRAF",
+        "first": false,
+        "domains": [],
+        "domainSuffixes": [],
+        "domainKeywords": [],
+        "geosites": [],
+        "geoips": [],
+        "processNames": [
+          "qbittorrent.exe",
+          "uTorrent.exe",
+          "Transmission.exe"
+        ],
+        "ipCidrs": [],
+        "rawRules": [],
+        "match": false
+      }
+    },
+    {
+      "id": "proxyProvider-35",
+      "kind": "proxyProvider",
+      "label": "Subscription 4",
+      "position": {
+        "x": -631.983836476174,
+        "y": 292.3896745198117
+      },
+      "enabled": false,
+      "canvasGroupId": "panel-4",
+      "providerKey": "source_4",
+      "sourceType": "http",
+      "subscriptionUrl": "https://subscription.invalid/replace-source-4",
+      "resolverMode": "serverless",
+      "interval": 3600,
+      "path": "./source_4.yaml",
+      "healthCheck": {
+        "enable": true,
+        "interval": 600,
+        "url": "http://www.gstatic.com/generate_204"
+      },
+      "formatter": {
+        "enabled": true,
+        "sourceFormat": "clash"
       }
     }
   ],
   "edges": [
     {
-      "id": "553d79b0-255c-4c7a-9d98-95063d12a2f7",
-      "source": "b10624f1-9860-4a23-9d3b-cf8c813cc23a",
-      "target": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "id": "edge-1",
+      "source": "manualProxy-3",
+      "target": "sourceMerge-16",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-2",
+      "source": "panel-1",
+      "target": "proxyGroup-4",
       "kind": "ruleset-target"
     },
     {
-      "id": "d527f90b-4aac-42fd-b427-967a3fb2eb65",
-      "source": "a49c3d9a-1fd2-473d-8127-50c7ce652204",
-      "target": "f48f0a86-98a9-49f1-8c56-8f6af5c56a0b",
+      "id": "edge-3",
+      "source": "sourceMerge-16",
+      "target": "proxyGroup-8",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-4",
+      "source": "sourceMerge-17",
+      "target": "proxyGroup-6",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-5",
+      "source": "panel-2",
+      "target": "proxyGroup-15",
       "kind": "ruleset-target"
     },
     {
-      "id": "2ed7d446-de45-4e40-ace1-978b265ebb9c",
-      "source": "18e201d3-9e10-4128-af51-9cf892f030b5",
-      "target": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "id": "edge-6",
+      "source": "panel-3",
+      "target": "proxyGroup-5",
       "kind": "ruleset-target"
     },
     {
-      "id": "9878bda1-84ba-4f0b-82a2-368da19c2e94",
-      "source": "6f7fa62d-a168-4f6a-889c-1cef5a6354ec",
-      "target": "f6e41bdd-4535-4b8f-9897-72b69f211338",
+      "id": "edge-7",
+      "source": "sourceMerge-18",
+      "target": "proxyGroup-5",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-8",
+      "source": "manualProxy-3",
+      "target": "sourceMerge-18",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-9",
+      "source": "sourceMerge-18",
+      "target": "proxyGroup-4",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-10",
+      "source": "manualProxy-3",
+      "target": "sourceMerge-17",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-11",
+      "source": "sourceMerge-20",
+      "target": "proxyGroup-7",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-12",
+      "source": "ruleSet-14",
+      "target": "proxyGroup-8",
       "kind": "ruleset-target"
     },
     {
-      "id": "57d60c31-7c29-464e-a072-f0f7da94611e",
-      "source": "8bba89c1-f744-43b4-b761-181aa5dd1c26",
-      "target": "c7eb0822-0a3d-45dd-98b3-593085ad5c27",
+      "id": "edge-13",
+      "source": "proxyProvider-2",
+      "target": "sourceMerge-18",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-14",
+      "source": "proxyProvider-2",
+      "target": "sourceMerge-20",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-15",
+      "source": "proxyProvider-21",
+      "target": "sourceMerge-18",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-16",
+      "source": "proxyProvider-21",
+      "target": "sourceMerge-17",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-17",
+      "source": "proxyProvider-21",
+      "target": "sourceMerge-20",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-18",
+      "source": "proxyProvider-2",
+      "target": "sourceMerge-16",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-19",
+      "source": "proxyProvider-21",
+      "target": "sourceMerge-16",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-20",
+      "source": "panel-6",
+      "target": "proxyGroup-7",
       "kind": "ruleset-target"
     },
     {
-      "id": "5b6b7fae-3a38-47ec-a3d6-20591b9d9415",
-      "source": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
-      "target": "b98c9675-88de-4886-81ed-43a74f8e2790",
-      "kind": "group-source"
-    },
-    {
-      "id": "a894ef31-4e70-4700-b066-984ad0135764",
-      "source": "a8754dd4-96ae-4d93-86db-f75a860f0f6b",
-      "target": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
+      "id": "edge-21",
+      "source": "ruleSet-30",
+      "target": "proxyGroup-31",
       "kind": "ruleset-target"
     },
     {
-      "id": "0b6af405-57af-4a47-a542-40c2891f8ea9",
-      "source": "b98c9675-88de-4886-81ed-43a74f8e2790",
-      "target": "c2021ded-75a3-4170-80de-863fc48893f0",
+      "id": "edge-22",
+      "source": "sourceMerge-18",
+      "target": "proxyGroup-31",
       "kind": "group-source"
     },
     {
-      "id": "f749a36b-9f06-4cf9-bfca-02ffed9c056c",
-      "source": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
-      "target": "f6e41bdd-4535-4b8f-9897-72b69f211338",
+      "id": "edge-23",
+      "source": "vlessProxy-32",
+      "target": "sourceMerge-18",
       "kind": "group-source"
     },
     {
-      "id": "b7ae4dfa-15fe-421e-97ae-f4766b061b7f",
-      "source": "dc3b84f8-fc4c-4b04-88e9-efc1e3156fbf",
-      "target": "c7eb0822-0a3d-45dd-98b3-593085ad5c27",
+      "id": "edge-24",
+      "source": "vlessProxy-32",
+      "target": "sourceMerge-20",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-25",
+      "source": "proxyProvider-33",
+      "target": "sourceMerge-20",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-26",
+      "source": "vlessProxy-32",
+      "target": "sourceMerge-16",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-27",
+      "source": "proxyProvider-33",
+      "target": "sourceMerge-18",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-28",
+      "source": "proxyProvider-33",
+      "target": "sourceMerge-16",
+      "kind": "group-source"
+    },
+    {
+      "id": "edge-29",
+      "source": "ruleSet-13",
+      "target": "proxyGroup-6",
       "kind": "ruleset-target"
     },
     {
-      "id": "f19fb4b9-5ab9-464f-a2fc-d1011419675d",
-      "source": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
-      "target": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "id": "edge-30",
+      "source": "ruleSet-34",
+      "target": "proxyGroup-15",
       "kind": "ruleset-target"
     },
     {
-      "id": "f06bdfac-03ba-4f58-8f57-5812d7fb9faf",
-      "source": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
-      "target": "f98b3f0f-9e6b-4832-9d25-b245ea408018",
+      "id": "edge-31",
+      "source": "proxyProvider-35",
+      "target": "sourceMerge-20",
       "kind": "group-source"
-    },
-    {
-      "id": "0b668a98-8bbb-4820-96e2-31fdc1f751eb",
-      "source": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
-      "target": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
-      "kind": "group-source"
-    },
-    {
-      "id": "25331c01-68e6-4a2a-9728-13b49fd39b7c",
-      "source": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
-      "target": "c9ad4325-b1d0-4906-bbb9-72ae19806e3d",
-      "kind": "group-source"
-    },
-    {
-      "id": "2f1cf4bd-5e29-422a-8143-f4d2c0c03345",
-      "source": "5af0d31d-b3a0-4c67-bca3-c3e72a88c494",
-      "target": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
-      "kind": "group-source"
-    },
-    {
-      "id": "41f706d8-47a7-49b9-962d-b4fc2d495ba7",
-      "source": "bc8afd89-7c52-4a7c-9e63-21928b0b0da1",
-      "target": "f48f0a86-98a9-49f1-8c56-8f6af5c56a0b",
-      "kind": "group-source"
-    },
-    {
-      "id": "cdd17462-cb03-434b-bf7f-330307a66374",
-      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
-      "target": "88147807-3339-4b9a-ae9b-4a502f4f6f9a",
-      "kind": "group-source"
-    },
-    {
-      "id": "d5487386-ca0d-4178-a311-47678913a36d",
-      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
-      "target": "bc8afd89-7c52-4a7c-9e63-21928b0b0da1",
-      "kind": "group-source"
-    },
-    {
-      "id": "9997aab2-1019-42d2-9a35-d779b3da5ae5",
-      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
-      "target": "0f0bba86-87fd-4b92-8840-c0f79f1b5da1",
-      "kind": "group-source"
-    },
-    {
-      "id": "926f13ce-f978-4d8b-9e3f-e1dc7cc7faf5",
-      "source": "79dbdd14-77d6-4b4b-8fd7-0ea6cfb9dbd5",
-      "target": "b98c9675-88de-4886-81ed-43a74f8e2790",
-      "kind": "group-source"
-    },
-    {
-      "id": "5c51603d-b6ba-4af1-aabc-b93323eddaef",
-      "source": "34015a7c-913b-46cd-a0d2-16ac792e6e8c",
-      "target": "c2021ded-75a3-4170-80de-863fc48893f0",
-      "kind": "ruleset-target"
     }
   ],
   "canvasGroups": [
     {
-      "id": "a8754dd4-96ae-4d93-86db-f75a860f0f6b",
+      "id": "panel-1",
       "label": "Rule Panel 1",
       "enabled": true,
       "role": "rulePanel",
       "color": "#dbeafe",
       "position": {
-        "x": 1112.3574276527331,
-        "y": -141.96523311897099
+        "x": 1003.6065937390579,
+        "y": -316.4268624626031
       },
       "size": {
         "width": 260,
@@ -710,14 +1458,14 @@
       }
     },
     {
-      "id": "dc3b84f8-fc4c-4b04-88e9-efc1e3156fbf",
+      "id": "panel-2",
       "label": "Rule Panel 2",
       "enabled": true,
       "role": "rulePanel",
       "color": "#dbeafe",
       "position": {
-        "x": 1169.3193018784607,
-        "y": 763.7435003848672
+        "x": 1386.88380104994,
+        "y": 423.85757605454876
       },
       "size": {
         "width": 260,
@@ -725,14 +1473,14 @@
       }
     },
     {
-      "id": "cfcda2c9-d5c2-4515-aebc-b6cea5ad748b",
+      "id": "panel-3",
       "label": "Rule Panel 3",
       "enabled": true,
       "role": "rulePanel",
       "color": "#dbeafe",
       "position": {
-        "x": 1113.7568948416026,
-        "y": 46.16196197171908
+        "x": 1395.7148991932454,
+        "y": -341.4257355327314
       },
       "size": {
         "width": 260,
@@ -740,39 +1488,54 @@
       }
     },
     {
-      "id": "cb7dbd8d-1811-46d4-9aed-c7f12b3e423c",
+      "id": "panel-4",
       "label": "Panel 4",
       "enabled": true,
       "role": "generic",
       "color": "#dbeafe",
       "position": {
-        "x": -601.751712770654,
-        "y": -248.2893283530696
+        "x": -677.9711129890969,
+        "y": -341.10971717922513
       },
       "size": {
-        "width": 887,
-        "height": 802
+        "width": 798.3108237442445,
+        "height": 989.1877406446154
       }
     },
     {
-      "id": "4741c0d2-1c8b-4dca-b31d-480656c3c07d",
+      "id": "panel-5",
       "label": "Panel 5",
       "enabled": true,
       "role": "generic",
       "color": "#dbeafe",
       "position": {
-        "x": 479.11767690031877,
-        "y": -305.4477179637646
+        "x": 171.4041466796367,
+        "y": -307.5629097916672
       },
       "size": {
         "width": 446,
         "height": 1239
       }
+    },
+    {
+      "id": "panel-6",
+      "label": "Rule Panel 6",
+      "enabled": true,
+      "role": "rulePanel",
+      "color": "#dbeafe",
+      "position": {
+        "x": 1009.992661616009,
+        "y": -30.919053321693458
+      },
+      "size": {
+        "width": 260,
+        "height": 170
+      }
     }
   ],
   "meta": {
     "version": 1,
-    "createdAt": "2026-03-29T14:38:44.208Z",
-    "updatedAt": "2026-03-30T15:12:14.587Z"
+    "createdAt": "2026-10-07T00:00:00.000Z",
+    "updatedAt": "2026-10-07T00:00:00.000Z"
   }
 }

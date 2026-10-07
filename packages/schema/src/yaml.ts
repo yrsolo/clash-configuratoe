@@ -1,3 +1,4 @@
+import { getDefaultFormatterUrl } from "./formatter";
 import { stringify } from "yaml";
 
 import type {
@@ -11,6 +12,39 @@ import type {
   ProxyProviderNode,
   RuleSetNode
 } from "./types";
+
+const vlessUriToProxy = (link: string): Record<string, unknown> | null => {
+  try {
+    const url = new URL(link);
+    if (url.protocol !== "vless:" || !url.username || !url.hostname) return null;
+    const params = url.searchParams;
+    const name = url.hash ? decodeURIComponent(url.hash.slice(1)) : `${url.hostname}:${url.port || "443"}`;
+    const proxy: Record<string, unknown> = {
+      name,
+      type: "vless",
+      server: url.hostname,
+      port: Number(url.port || 443),
+      uuid: decodeURIComponent(url.username),
+      network: params.get("type") || "tcp",
+      udp: true
+    };
+    if (params.get("security") === "reality") {
+      proxy.tls = true;
+      if (params.get("sni")) proxy.servername = params.get("sni")!;
+      if (params.get("fp")) proxy["client-fingerprint"] = params.get("fp")!;
+      if (params.get("flow")) proxy.flow = params.get("flow")!;
+      if (params.get("pbk")) {
+        proxy["reality-opts"] = {
+          "public-key": params.get("pbk")!,
+          ...(params.get("sid") ? { "short-id": params.get("sid")! } : {})
+        };
+      }
+    }
+    return proxy;
+  } catch {
+    return null;
+  }
+};
 
 const quoteYamlUrlScalars = (yaml: string) =>
   yaml.replace(/^(\s*url:\s*)(.+)$/gm, (_match, prefix: string, value: string) => {
@@ -51,9 +85,9 @@ const findNode = <T extends ConfigNode["kind"]>(
 const getGlobalSettings = (project: ConfigProject): GlobalSettingsNode | undefined =>
   project.nodes.find((node): node is GlobalSettingsNode => node.kind === "globalSettings");
 
-const buildFormatterUrl = (baseUrl: string, subscriptionUrl: string) => {
+const buildFormatterUrl = (baseUrl: string, subscriptionUrl: string, sourceFormat?: string) => {
   const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}url=${encodeURIComponent(subscriptionUrl)}`;
+  return `${baseUrl}${separator}url=${encodeURIComponent(subscriptionUrl)}${sourceFormat === "clash" ? "&format=clash" : ""}`;
 };
 
 type SourcePathContext = {
@@ -70,6 +104,12 @@ type ResolvedSource =
   | {
       kind: "manual";
       proxy: ManualProxyNode;
+      context: SourcePathContext;
+    }
+  | {
+      kind: "vless";
+      proxy: Record<string, unknown>;
+      name: string;
       context: SourcePathContext;
     }
   | {
@@ -141,6 +181,13 @@ const resolveIncomingSources = (
       continue;
     }
 
+    if (source.kind === "vlessProxy") {
+      const proxy = vlessUriToProxy(source.vlessUrl);
+      const name = typeof proxy?.name === "string" ? proxy.name : source.label;
+      if (proxy && applyNameFilters(name, context)) resolved.push({ kind: "vless", proxy, name, context });
+      continue;
+    }
+
     if (source.kind === "proxyGroup") {
       if (applyNameFilters(source.group.name, context)) {
         resolved.push({ kind: "group", group: source, context });
@@ -168,11 +215,14 @@ const buildProviderEntry = (
     {
       type: provider.sourceType,
       url:
-        provider.formatter.enabled && globals?.settings.formatterUrl
+        provider.formatter.sourceFormat === "clash"
+          ? buildFormatterUrl(globals?.settings.formatterUrl ?? getDefaultFormatterUrl(), provider.subscriptionUrl, "clash")
+          : provider.formatter.enabled && globals?.settings.formatterUrl
           ? buildFormatterUrl(globals.settings.formatterUrl, provider.subscriptionUrl)
           : provider.subscriptionUrl,
       interval: globals?.settings.sourceUpdateInterval ?? provider.interval,
-      path: provider.path,
+        path: provider.path,
+        override: { "additional-prefix": `${provider.providerKey} ` },
       filter: context.invert && (context.filterTerms?.length ?? 0) > 0 ? context.filterTerms?.join("|") : undefined,
       "exclude-filter":
         !context.invert && (context.filterTerms?.length ?? 0) > 0 ? context.filterTerms?.join("|") : undefined,
@@ -272,6 +322,13 @@ const getRuleConnections = (project: ConfigProject) => {
 export const projectToClashObject = (project: ConfigProject) => {
   const globals = getGlobalSettings(project);
   const proxies = project.nodes.filter((node): node is ManualProxyNode => node.kind === "manualProxy" && node.enabled !== false);
+  const vlessProxies = project.nodes
+    .filter(
+      (node): node is Extract<ConfigNode, { kind: "vlessProxy" }> =>
+        node.kind === "vlessProxy" && node.enabled !== false
+    )
+    .map((node) => vlessUriToProxy(node.vlessUrl))
+    .filter((proxy): proxy is Record<string, unknown> => proxy !== null);
   const groups = project.nodes.filter((node): node is ProxyGroupNode => node.kind === "proxyGroup" && node.enabled !== false);
   const providerEntries = new Map<string, Record<string, unknown>>();
   const yamlGroups = groups.map((group) => {
@@ -289,6 +346,10 @@ export const projectToClashObject = (project: ConfigProject) => {
       .filter((item): item is Extract<ResolvedSource, { kind: "manual" }> => item.kind === "manual")
       .map(({ proxy }) => proxy.proxy.name);
 
+    const linkedVlessProxies = resolved
+      .filter((item): item is Extract<ResolvedSource, { kind: "vless" }> => item.kind === "vless")
+      .map(({ name }) => name);
+
     const linkedGroups = resolved
       .filter((item): item is Extract<ResolvedSource, { kind: "group" }> => item.kind === "group")
       .map(({ group: sourceGroup }) => sourceGroup.group.name);
@@ -296,6 +357,7 @@ export const projectToClashObject = (project: ConfigProject) => {
     const proxiesList = [
       ...(group.group.includeDirect ? ["DIRECT"] : []),
       ...linkedProxies,
+      ...linkedVlessProxies,
       ...linkedGroups
     ];
 
@@ -305,7 +367,9 @@ export const projectToClashObject = (project: ConfigProject) => {
     };
 
     if (group.group.autoSelect) {
-      groupObject.url = globals?.settings.healthCheckUrl ?? "http://www.gstatic.com/generate_204";
+      groupObject.url = group.group.customHealthCheckEnabled
+        ? group.group.customHealthCheckUrl
+        : globals?.settings.healthCheckUrl ?? "http://www.gstatic.com/generate_204";
       groupObject.interval = group.group.interval;
       groupObject.tolerance = group.group.tolerance;
     }
@@ -346,7 +410,7 @@ export const projectToClashObject = (project: ConfigProject) => {
       "store-selected": true
     },
     "proxy-providers": Object.fromEntries(providerEntries),
-    proxies: proxies.map((proxy) => proxy.proxy),
+    proxies: [...proxies.map((proxy) => proxy.proxy), ...vlessProxies],
     "proxy-groups": yamlGroups,
     rules
   };

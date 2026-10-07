@@ -4,10 +4,10 @@ This repository follows a lightweight documentation-first workflow.
 
 ## Before Large Changes
 
-1. Read [README.md](/n:/PROJECTS/service/clash-configuratoe/README.md).
-2. Read [docs/README.md](/n:/PROJECTS/service/clash-configuratoe/docs/README.md).
-3. Read [agent/OPERATING_CONTRACT.md](/n:/PROJECTS/service/clash-configuratoe/agent/OPERATING_CONTRACT.md).
-4. Read [work/now/current-task.md](/n:/PROJECTS/service/clash-configuratoe/work/now/current-task.md).
+1. Read [README.md](readme.md).
+2. Read [docs/README.md](docs/README.md).
+3. Read [agent/OPERATING_CONTRACT.md](agent/OPERATING_CONTRACT.md).
+4. Read [work/now/current-task.md](work/now/current-task.md).
 5. Update `work/now/plan.md` if the task is larger than a local tweak.
 
 ## Source Of Truth

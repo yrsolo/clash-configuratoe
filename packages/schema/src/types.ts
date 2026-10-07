@@ -17,7 +17,8 @@ export const healthCheckSchema = z.object({
 });
 
 export const sourceFormatterSchema = z.object({
-  enabled: z.boolean().default(false)
+  enabled: z.boolean().default(false),
+  sourceFormat: z.enum(["legacy", "clash"]).optional()
 });
 
 const baseNodeShape = {
@@ -64,6 +65,14 @@ export const manualProxyNodeSchema = z.object({
   })
 });
 
+export const vlessProxyNodeSchema = z.object({
+  ...baseNodeShape,
+  kind: z.literal("vlessProxy"),
+  vlessUrl: z.string().url().refine((value) => value.startsWith("vless://"), {
+    message: "VLESS node requires a vless:// URI."
+  })
+});
+
 export const sourceMergeNodeSchema = z.object({
   ...baseNodeShape,
   kind: z.literal("sourceMerge"),
@@ -83,6 +92,8 @@ export const proxyGroupNodeSchema = z.object({
     includeDirect: z.boolean().default(true),
     autoSelect: z.boolean().default(false),
     catchAll: z.boolean().default(false),
+    customHealthCheckEnabled: z.boolean().default(false),
+    customHealthCheckUrl: z.string().default("http://www.gstatic.com/generate_204"),
     interval: z.number().int().positive().default(300),
     tolerance: z.number().int().positive().default(300)
   })
@@ -135,6 +146,7 @@ export const globalSettingsNodeSchema = z.object({
 export const configNodeSchema = z.discriminatedUnion("kind", [
   proxyProviderNodeSchema,
   manualProxyNodeSchema,
+  vlessProxyNodeSchema,
   sourceMergeNodeSchema,
   proxyGroupNodeSchema,
   ruleSetNodeSchema,
@@ -210,6 +222,12 @@ export const projectSecretsEnvelopeSchema = z.object({
           username: z.string().optional(),
           password: z.string().optional()
         })
+      ).default({}),
+      vlessProxies: z.record(
+        z.string(),
+        z.object({
+          vlessUrl: z.string().url()
+        })
       ).default({})
     })
   ).default({})
@@ -233,6 +251,7 @@ export type Position = z.infer<typeof positionSchema>;
 export type Size = z.infer<typeof sizeSchema>;
 export type ProxyProviderNode = z.infer<typeof proxyProviderNodeSchema>;
 export type ManualProxyNode = z.infer<typeof manualProxyNodeSchema>;
+export type VlessProxyNode = z.infer<typeof vlessProxyNodeSchema>;
 export type SourceMergeNode = z.infer<typeof sourceMergeNodeSchema>;
 export type ProxyGroupNode = z.infer<typeof proxyGroupNodeSchema>;
 export type RuleSetNode = z.infer<typeof ruleSetNodeSchema>;

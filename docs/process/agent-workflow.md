@@ -2,7 +2,7 @@
 
 ## Default Cycle
 
-1. Read [README.md](/n:/PROJECTS/service/clash-configuratoe/README.md), [docs/README.md](/n:/PROJECTS/service/clash-configuratoe/docs/README.md), and [agent/OPERATING_CONTRACT.md](/n:/PROJECTS/service/clash-configuratoe/agent/OPERATING_CONTRACT.md).
+1. Read [README.md](../../readme.md), [docs/README.md](../README.md), and [agent/OPERATING_CONTRACT.md](../../agent/OPERATING_CONTRACT.md).
 2. Update tracking files for non-trivial work.
 3. Implement code and docs together.
 4. Run targeted checks.

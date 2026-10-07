@@ -1,3 +1,4 @@
+import { getDefaultFormatterUrl } from "./formatter";
 import { parse } from "yaml";
 
 import { transliterateLabel } from "./project";
@@ -45,7 +46,7 @@ export const importClashYaml = (source: string): ConfigProject => {
       sourceUpdateInterval: 3600,
       sourceHealthCheckInterval: 600,
       healthCheckUrl: "http://www.gstatic.com/generate_204",
-      formatterUrl: "https://clash.solofarm.ru/api/formatter"
+      formatterUrl: getDefaultFormatterUrl()
     }
   };
 
@@ -56,14 +57,16 @@ export const importClashYaml = (source: string): ConfigProject => {
       const provider = providerRaw as Record<string, any>;
       let subscriptionUrl = provider.url ?? "https://resolver.invalid/?url=https%3A%2F%2Fexample.com";
       let formatterEnabled = false;
+      let sourceFormat: "clash" | undefined;
 
       try {
         const parsedUrl = new URL(String(provider.url));
         const nestedUrl = parsedUrl.searchParams.get("url");
         if (nestedUrl) {
-          subscriptionUrl = decodeURIComponent(nestedUrl);
+          subscriptionUrl = nestedUrl;
+          sourceFormat = parsedUrl.searchParams.get("format") === "clash" ? "clash" : undefined;
           formatterEnabled = true;
-          detectedFormatterUrl = "https://clash.solofarm.ru/api/formatter";
+          detectedFormatterUrl = `${parsedUrl.origin}${parsedUrl.pathname}`;
         }
       } catch {
         // Keep original provider url when it is not a valid nested formatter URL.
@@ -90,7 +93,8 @@ export const importClashYaml = (source: string): ConfigProject => {
             "http://www.gstatic.com/generate_204"
         },
         formatter: {
-          enabled: formatterEnabled
+          enabled: formatterEnabled,
+          sourceFormat
         }
       };
     }
@@ -100,43 +104,57 @@ export const importClashYaml = (source: string): ConfigProject => {
     globals.settings.formatterUrl = detectedFormatterUrl;
   }
 
-  const proxyNodes: ConfigNode[] = (parsed.proxies ?? []).map((proxy: any, index: number) => ({
-    id: crypto.randomUUID(),
-    kind: "manualProxy",
-    label: proxy.name,
-    position: getPosition(index + 1, 0.9),
-    enabled: true,
-    proxy: {
-      name: proxy.name,
-      type: proxy.type ?? "http",
-      server: proxy.server,
-      port: Number(proxy.port),
-      username: proxy.username,
-      password: proxy.password,
-      udp: proxy.udp
+  const proxyNodes: ConfigNode[] = (parsed.proxies ?? []).map((proxy: any, index: number) => {
+    if (proxy.type === "vless") {
+      const params = new URLSearchParams({ type: proxy.network ?? "tcp" });
+      if (proxy.tls && proxy["reality-opts"]?.["public-key"]) {
+        params.set("security", "reality");
+        params.set("pbk", proxy["reality-opts"]["public-key"]);
+        if (proxy["reality-opts"]?.["short-id"]) params.set("sid", proxy["reality-opts"]["short-id"]);
+        if (proxy.servername) params.set("sni", proxy.servername);
+        if (proxy["client-fingerprint"]) params.set("fp", proxy["client-fingerprint"]);
+        if (proxy.flow) params.set("flow", proxy.flow);
+      }
+      return {
+        id: crypto.randomUUID(), kind: "vlessProxy" as const, label: proxy.name,
+        position: getPosition(index + 1, 0.9), enabled: true,
+        vlessUrl: `vless://${encodeURIComponent(proxy.uuid)}@${proxy.server}:${Number(proxy.port)}?${params.toString()}#${encodeURIComponent(proxy.name)}`
+      };
     }
-  }));
+    return {
+      id: crypto.randomUUID(), kind: "manualProxy" as const, label: proxy.name,
+      position: getPosition(index + 1, 0.9), enabled: true,
+      proxy: { name: proxy.name, type: proxy.type ?? "http", server: proxy.server, port: Number(proxy.port), username: proxy.username, password: proxy.password, udp: proxy.udp }
+    };
+  });
 
-  const groupNodes: ProxyGroupNode[] = (parsed["proxy-groups"] ?? []).map((group: any, index: number) => ({
+  const parsedGroups = parsed["proxy-groups"] ?? [];
+  const firstAutoSelectUrl = parsedGroups.find((group: any) => group.type === "url-test" && group.url)?.url;
+  if (firstAutoSelectUrl) {
+    globals.settings.healthCheckUrl = firstAutoSelectUrl;
+  }
+
+  const groupNodes: ProxyGroupNode[] = parsedGroups.map((group: any, index: number) => ({
     id: crypto.randomUUID(),
     kind: "proxyGroup",
     label: transliterateLabel(group.name),
     position: getPosition(index, 2.1),
     enabled: true,
-      group: {
-        name: group.name,
-        includeDirect: Array.isArray(group.proxies) && group.proxies.includes("DIRECT"),
-        autoSelect: group.type === "url-test",
-        catchAll: false,
-        interval: group.interval ?? 300,
-        tolerance: group.tolerance ?? 300
+    group: {
+      name: group.name,
+      includeDirect: Array.isArray(group.proxies) && group.proxies.includes("DIRECT"),
+      autoSelect: group.type === "url-test",
+      catchAll: false,
+      customHealthCheckEnabled: Boolean(
+        group.type === "url-test" &&
+          group.url &&
+          group.url !== firstAutoSelectUrl
+      ),
+      customHealthCheckUrl: group.url ?? "http://www.gstatic.com/generate_204",
+      interval: group.interval ?? 300,
+      tolerance: group.tolerance ?? 300
     }
   }));
-
-  const firstAutoSelectUrl = (parsed["proxy-groups"] ?? []).find((group: any) => group.type === "url-test" && group.url)?.url;
-  if (firstAutoSelectUrl) {
-    globals.settings.healthCheckUrl = firstAutoSelectUrl;
-  }
 
   const edges: GraphEdge[] = [];
 
@@ -175,7 +193,9 @@ export const importClashYaml = (source: string): ConfigProject => {
       }
 
       const proxyNode = proxyNodes.find(
-        (entry) => entry.kind === "manualProxy" && entry.proxy.name === proxyName
+        (entry) =>
+          (entry.kind === "manualProxy" && entry.proxy.name === proxyName) ||
+          (entry.kind === "vlessProxy" && entry.label === proxyName)
       );
       if (proxyNode) {
         edges.push({

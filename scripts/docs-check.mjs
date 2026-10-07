@@ -1,8 +1,11 @@
-import { access } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = fileURLToPath(new URL("../", import.meta.url));
 
 const requiredPaths = [
-  "README.md",
+  "readme.md",
   "AGENTS.md",
   "agent/OPERATING_CONTRACT.md",
   ".codex/skills/verify-docs-architecture/SKILL.md",
@@ -35,14 +38,26 @@ const requiredPaths = [
   "work/now/evidence.md",
   "work/roadmap/README.md",
   "work/archive/README.md",
-  "serverless/README.md"
+  "serverless/README.md",
+  "docs/reference/handover.md",
+  "docs/reference/yandex-registration.md",
+  "docs/reference/yandex-deploy.md",
+  "docs/reference/starter-configuration.md",
+  "docs/reference/operations.md",
+  "docs/reference/clients/README.md",
+  "docs/reference/clients/windows.md",
+  "docs/reference/clients/macos.md",
+  "docs/reference/clients/android.md",
+  "docs/reference/clients/ios.md",
+  "default/new.json",
+  "deploy/yandex/gateway.openapi.template.yaml"
 ];
 
 const missing = [];
 
 for (const file of requiredPaths) {
   try {
-    await access(path.resolve(file));
+    await access(path.resolve(root, file));
   } catch {
     missing.push(file);
   }
@@ -56,4 +71,35 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-console.log("Documentation structure looks complete.");
+const skipped = new Set(["node_modules", "dist", ".git", ".playwright-cli", "test-results", "coverage", "tmp", "generated"]);
+const markdownFiles = [];
+const walk = async (directory) => {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory() && !skipped.has(entry.name)) await walk(file);
+    else if (entry.isFile() && entry.name.endsWith(".md")) markdownFiles.push(file);
+  }
+};
+await walk(root);
+const broken = [];
+let checkedLinks = 0;
+for (const file of markdownFiles) {
+  const source = (await readFile(file, "utf8")).replace(/```[\s\S]*?```/g, "");
+  for (const match of source.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
+    let target = match[1].trim().replace(/^<|>$/g, "");
+    if (/^(https?:|mailto:|app:|codex:|#)/i.test(target)) continue;
+    if (/^(\/|[a-z]:)/i.test(target)) {
+      broken.push(`${path.relative(root, file)}: machine-specific link ${target}`);
+      continue;
+    }
+    target = decodeURIComponent(target.split("#")[0]);
+    if (!target) continue;
+    try { await access(path.resolve(path.dirname(file), target)); checkedLinks++; }
+    catch { broken.push(`${path.relative(root, file)}: missing ${target}`); }
+  }
+}
+if (broken.length) {
+  console.error(broken.join("\n"));
+  process.exit(1);
+}
+console.log(`Documentation complete: ${markdownFiles.length} Markdown files, ${checkedLinks} local links checked.`);

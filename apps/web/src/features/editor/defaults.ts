@@ -1,3 +1,4 @@
+import { getDefaultFormatterUrl } from "@clash-configuratoe/schema";
 import type {
   ConfigNode,
   GlobalSettingsNode,
@@ -24,7 +25,7 @@ export const createNode = (kind: ConfigNode["kind"], count: number): ConfigNode 
       enabled: true,
       providerKey: `provider_${count + 1}`,
       sourceType: "http",
-      subscriptionUrl: "https://connliberty.com/connection/subs/23213932-1a03-4c0e-b80b-51ae3384edc7",
+      subscriptionUrl: "https://subscription.invalid/replace-with-your-subscription",
       resolverMode: "stub",
       interval: 3600,
       path: `./provider_${count + 1}.yaml`,
@@ -59,6 +60,17 @@ export const createNode = (kind: ConfigNode["kind"], count: number): ConfigNode 
     return node;
   }
 
+  if (kind === "vlessProxy") {
+    return {
+      id,
+      kind,
+      label: "VLESS Reality",
+      position,
+      enabled: true,
+      vlessUrl: "vless://00000000-0000-0000-0000-000000000000@example.com:443?security=reality&encryption=none&type=tcp&fp=chrome&pbk=placeholder&sni=example.com#VLESS"
+    };
+  }
+
   if (kind === "sourceMerge") {
     const node: SourceMergeNode = {
       id,
@@ -89,6 +101,8 @@ export const createNode = (kind: ConfigNode["kind"], count: number): ConfigNode 
         includeDirect: true,
         autoSelect: false,
         catchAll: false,
+        customHealthCheckEnabled: false,
+        customHealthCheckUrl: "http://www.gstatic.com/generate_204",
         interval: 300,
         tolerance: 300
       }
@@ -107,7 +121,7 @@ export const createNode = (kind: ConfigNode["kind"], count: number): ConfigNode 
         sourceUpdateInterval: 3600,
         sourceHealthCheckInterval: 600,
         healthCheckUrl: "http://www.gstatic.com/generate_204",
-        formatterUrl: "https://clash.solofarm.ru/api/formatter"
+        formatterUrl: getDefaultFormatterUrl()
       }
     };
     return node;

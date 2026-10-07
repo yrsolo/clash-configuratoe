@@ -1,64 +1,44 @@
 # clash-configuratoe
 
-`clash-configuratoe` is a static-first visual builder for Clash Verge configurations. Users assemble proxy providers, manual proxies, proxy groups, rule blocks, and visual panels on a node canvas, then publish a stable YAML URL or guest snapshot.
+Визуальный редактор конфигураций Clash/Mihomo. Позволяет собрать подписки, прокси, группы и правила на холсте, сохранить проект в JSON и получить YAML для клиентов устройств.
 
-## What It Is
+## Начать работу
 
-This repository contains the current working baseline for a browser-based Clash configuration editor. The product uses a canonical JSON project format for editing and persistence, while generating Clash-compatible YAML as a derived artifact for export and sharing.
+**Новый владелец:** откройте [инструкцию передачи и первого запуска](docs/reference/handover.md).
 
-## Why It Exists
+- [Регистрация в Яндекс Облаке](docs/reference/yandex-registration.md)
+- [Пошаговый деплой в свой аккаунт](docs/reference/yandex-deploy.md)
+- [Базовая схема и ввод своих подписок](docs/reference/starter-configuration.md)
+- [Клиенты: Windows, macOS, Android, iOS](docs/reference/clients/README.md)
+- [Резервные копии, обновление, диагностика](docs/reference/operations.md)
 
-Editing large Clash configs by hand is slow, error-prone, and hard to explain to non-expert users. This project makes the configuration structure visible and editable through a graph UI, with presets for common routing scenarios such as AI services, Telegram, video, torrents, and a default rest-of-world path.
+## Локальный запуск
 
-## Core Capabilities
-
-- Node-based editor for providers, proxies, groups, rules, and visual canvas panels
-- Canonical JSON project model with lossless editor metadata
-- JSON export for lossless project backup and transfer
-- Clash YAML export and best-effort Clash YAML import
-- Stable published YAML links for workspace projects, plus guest snapshot publish links and QR codes
-- Lightweight hash-based personal workspaces backed by a serverless storage bridge
-- Same-origin formatter and source inspection routes behind the Yandex gateway
-- Built-in starter presets and local draft autosave
-
-## Quick Start
+Node.js 24, npm 11:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Then open:
+Редактор: `http://localhost:5173`. Локальная правка и экспорт работают без облака; workspace, публикация и инспекция подписок требуют serverless API. Чистый старт использует [очищенную схему](default/new.json): все источники выключены, до ввода своих подписок трафик идёт напрямую.
 
-- Web app: `http://localhost:5173`
-- Documentation map: [docs/README.md](/n:/PROJECTS/service/clash-configuratoe/docs/README.md)
+## Возможности
 
-## Repository Structure
+- Узлы подписок, HTTP/SOCKS-прокси, VLESS Reality, объединения источников, групп и правил
+- Визуальные панели и панели правил, фильтры по имени серверов, пресеты сервисов
+- JSON-резервные копии, Clash YAML-экспорт, best-effort YAML-импорт
+- Локальные черновики, undo/redo, облачные рабочие пространства
+- Стабильный опубликованный YAML URL, гостевые снимки и QR
+- Серверный formatter, список серверов и ручная проверка из облака
 
-- `apps/web` - Vite + React client application
-- `packages/schema` - domain types, presets, import/export logic, validation
-- `docs` - permanent project documentation
-- `work` - active task tracking and evidence
-- `agent` - operating contract, prompt notes, and policy files
-- `.codex/skills` - reusable procedural skills for docs, tracking, and checks
-- `serverless` - cloud-function bridge code used behind the same-origin gateway
-- `.github/workflows` - CI checks
-- `scripts` - bootstrap, docs, and release helpers
+## Устройство репозитория
 
-## Documentation
+- `apps/web` — React/Vite-редактор
+- `packages/schema` — модель, валидация, импорт/экспорт и пресеты
+- `serverless/workspace-bridge` — Cloud Function для данных, публикации и подписок
+- `deploy/yandex`, `scripts` — переносимый шаблон Gateway и помощники деплоя
+- `docs` — [карта документации](docs/README.md), `work` — временные планы/результаты
+- `agent`, `.codex/skills` — [рабочий контракт](agent/OPERATING_CONTRACT.md) и процедуры
 
-Start here:
-
-- [Documentation Map](/n:/PROJECTS/service/clash-configuratoe/docs/README.md)
-- [Product Overview](/n:/PROJECTS/service/clash-configuratoe/docs/overview/product.md)
-- [System Overview](/n:/PROJECTS/service/clash-configuratoe/docs/architecture/system-overview.md)
-
-## Agent Workflow
-
-- [AGENTS.md](/n:/PROJECTS/service/clash-configuratoe/AGENTS.md)
-- [Operating Contract](/n:/PROJECTS/service/clash-configuratoe/agent/OPERATING_CONTRACT.md)
-- [Current Task](/n:/PROJECTS/service/clash-configuratoe/work/now/current-task.md)
-
-## Status
-
-Feature development is currently paused. The repository should be treated as a working MVP baseline with a live editor, serverless workspace/publish bridge, same-origin formatter, and cloud-side source inspection. The main remaining gaps are product hardening and stronger auth, not missing core editor infrastructure.
+Это рабочий MVP для личного использования/доверенной группы. Ограничения идентификации и публикации описаны в [эксплуатации](docs/reference/operations.md). Перед развёртыванием создайте свои ключи и подписки; прежний `.env` не использовать.

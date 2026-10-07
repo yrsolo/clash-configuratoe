@@ -8,6 +8,10 @@ coverage/
 .env
 .env.local
 .env.*.local
+.env.production
+deploy/yandex/*.local.yaml
+deploy/yandex/*.secrets.json
+deploy/yandex/*key*.json
 
 # IDE / OS
 .idea/
@@ -18,10 +22,12 @@ Thumbs.db
 # Build artifacts
 artifacts/tmp/
 artifacts/generated/
+serverless/*.zip
 
 # Test
 .vitest/
 test-results/
+.playwright-cli/
 
 # Logs
 *.log

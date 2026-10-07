@@ -1,4 +1,5 @@
 export * from "./import";
+export * from "./formatter";
 export * from "./presets";
 export * from "./project";
 export * from "./types";
