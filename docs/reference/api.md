@@ -2,6 +2,11 @@
 
 This project uses same-origin serverless routes behind the public gateway.
 
+The formatter endpoint accepts `format=clash` alongside `url`; source inspection accepts
+`format: "clash"` in its JSON body. This requests the source with
+`User-Agent: clash-verge/v2.4.0` and returns only its non-empty native `proxies` list,
+preserving protocol options. Omission keeps the legacy v2rayN request and conversion.
+
 ## Workspace API
 
 All workspace routes are `POST` and expect `userName` + `userKey`.

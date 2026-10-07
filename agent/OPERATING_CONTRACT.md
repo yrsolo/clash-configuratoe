@@ -16,11 +16,11 @@ Keep development verifiable, incremental, and easy to resume.
 
 Before noticeable work:
 
-1. Read [README.md](/n:/PROJECTS/service/clash-configuratoe/README.md).
-2. Read [docs/README.md](/n:/PROJECTS/service/clash-configuratoe/docs/README.md).
-3. Read [AGENTS.md](/n:/PROJECTS/service/clash-configuratoe/AGENTS.md).
-4. Check [work/now/current-task.md](/n:/PROJECTS/service/clash-configuratoe/work/now/current-task.md).
-5. Update [work/now/plan.md](/n:/PROJECTS/service/clash-configuratoe/work/now/plan.md) when the task is larger than a local tweak.
+1. Read [README.md](../readme.md).
+2. Read [docs/README.md](../docs/README.md).
+3. Read [AGENTS.md](../AGENTS.md).
+4. Check [work/now/current-task.md](../work/now/current-task.md).
+5. Update [work/now/plan.md](../work/now/plan.md) when the task is larger than a local tweak.
 
 ## Source Of Truth
 
@@ -39,4 +39,4 @@ Before closing a meaningful task:
 
 1. Update affected docs.
 2. Run relevant checks.
-3. Record evidence and residual risks in [work/now/evidence.md](/n:/PROJECTS/service/clash-configuratoe/work/now/evidence.md).
+3. Record evidence and residual risks in [work/now/evidence.md](../work/now/evidence.md).

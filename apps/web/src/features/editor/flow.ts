@@ -117,7 +117,7 @@ const getNodeHandles = (node: ConfigNode, dimensions: { width: number; height: n
 
   if (node.kind === "globalSettings") return [];
 
-  if (node.kind === "proxyProvider" || node.kind === "manualProxy") {
+  if (node.kind === "proxyProvider" || node.kind === "manualProxy" || node.kind === "vlessProxy") {
     return [
       {
         id: `${node.id}-source-out`,

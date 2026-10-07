@@ -2,8 +2,10 @@ import {
   builtInPresets,
   canConnectNodes,
   configProjectSchema,
+  getDefaultFormatterUrl,
   createCanvasGroup,
   importClashYaml,
+  renderClashYaml,
   validateProject,
   type ConfigNode,
   type ConfigProject,
@@ -14,7 +16,6 @@ import {
 } from "@clash-configuratoe/schema";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import exampleMergeYaml from "../../../../../example/Merge.yaml?raw";
 import defaultNewProject from "../../../../../default/new.json";
 
 import { createNode } from "./defaults";
@@ -40,15 +41,12 @@ import {
 import { extractProjectSecrets, mergeProjectSecrets } from "@/shared/workspaceSecrets";
 
 type WorkspaceStatus = "guest" | "loading" | "ready" | "error";
-
-const seedWorkspaceFromExample = () => {
-  const imported = importClashYaml(exampleMergeYaml);
-  return {
-    ...imported,
-    name: "Merge Example",
-    description: "Bootstrapped from example/Merge.yaml."
-  };
+type ProjectSetter = ConfigProject | ((current: ConfigProject) => ConfigProject);
+type ProjectCommitOptions = {
+  recordHistory?: boolean;
+  resetHistory?: boolean;
 };
+const PROJECT_HISTORY_LIMIT = 100;
 
 const createDefaultProject = (): ConfigProject => {
   const template = structuredClone(defaultNewProject) as ConfigProject;
@@ -56,7 +54,10 @@ const createDefaultProject = (): ConfigProject => {
 
   return configProjectSchema.parse({
     ...template,
-    id: template.id || crypto.randomUUID(),
+    id: crypto.randomUUID(),
+    nodes: template.nodes.map(node => node.kind === "globalSettings"
+      ? { ...node, settings: { ...node.settings, formatterUrl: getDefaultFormatterUrl() } }
+      : node),
     meta: {
       ...template.meta,
       version: template.meta?.version ?? 1,
@@ -83,15 +84,30 @@ const guestProject = () => {
   return createDefaultProject();
 };
 
+const createWorkspacePersistenceSnapshot = (project: ConfigProject) => {
+  const { sanitizedProject, secrets } = extractProjectSecrets(project, project.id);
+
+  return JSON.stringify({
+    project: sanitizedProject,
+    publishedProject: project,
+    secrets,
+    yaml: renderClashYaml(project)
+  });
+};
+
 export const useEditorProject = (initialProject?: ConfigProject | null) => {
-  const [project, setProject] = useState<ConfigProject>(() => {
+  const [project, setProjectState] = useState<ConfigProject>(() => {
     if (initialProject) {
       return configProjectSchema.parse(initialProject);
     }
 
     return guestProject();
   });
+  const projectRef = useRef(project);
+  const [pastProjects, setPastProjects] = useState<ConfigProject[]>([]);
+  const [futureProjects, setFutureProjects] = useState<ConfigProject[]>([]);
   const [yamlImport, setYamlImport] = useState("");
+  const [importError, setImportError] = useState<string | null>(null);
   const [publishArtifact, setPublishArtifact] = useState<PublishArtifact | null>(null);
   const [workspaceSession, setWorkspaceSession] = useState<UserSession | null>(() => loadWorkspaceSession());
   const [workspaceIndex, setWorkspaceIndex] = useState<UserWorkspaceIndex | null>(null);
@@ -105,11 +121,50 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
   });
   const hydrationRef = useRef(false);
   const saveTimeoutRef = useRef<number | null>(null);
+  const lastPersistedSnapshotRef = useRef<string | null>(null);
   const validationIssues = useMemo(() => validateProject(project), [project]);
   const [yamlPreview, setYamlPreview] = useState(
     "# Published YAML preview appears here after you refresh the stable publish link.\n"
   );
   const [yamlPreviewStatus, setYamlPreviewStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  useEffect(() => {
+    projectRef.current = project;
+  }, [project]);
+
+  const commitProject = (nextProject: ProjectSetter, options: ProjectCommitOptions = {}) => {
+    const currentProject = projectRef.current;
+    const resolvedProject =
+      typeof nextProject === "function"
+        ? (nextProject as (current: ConfigProject) => ConfigProject)(currentProject)
+        : nextProject;
+
+    if (resolvedProject === currentProject) {
+      return currentProject;
+    }
+
+    const parsedProject = configProjectSchema.parse(resolvedProject);
+
+    if (options.resetHistory) {
+      setPastProjects([]);
+      setFutureProjects([]);
+    } else if (options.recordHistory !== false) {
+      setPastProjects((current) => [
+        ...current.slice(-(PROJECT_HISTORY_LIMIT - 1)),
+        currentProject
+      ]);
+      setFutureProjects([]);
+    }
+
+    projectRef.current = parsedProject;
+    setProjectState(parsedProject);
+    return parsedProject;
+  };
+
+  const setProject = (nextProject: ProjectSetter) => commitProject(nextProject);
+
+  const loadProjectWithoutHistory = (nextProject: ConfigProject) =>
+    commitProject(nextProject, { recordHistory: false, resetHistory: true });
 
   const persistWorkspaceProject = async (
     targetProject: ConfigProject,
@@ -121,6 +176,12 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     }
 
     const { sanitizedProject, secrets } = extractProjectSecrets(targetProject, targetProject.id);
+    const persistenceSnapshot = JSON.stringify({
+      project: sanitizedProject,
+      publishedProject: targetProject,
+      secrets,
+      yaml: renderClashYaml(targetProject)
+    });
     const nextIndex = await saveWorkspaceProject(
       {
         ...session,
@@ -132,13 +193,19 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
       options
     );
 
+    lastPersistedSnapshotRef.current = persistenceSnapshot;
     setWorkspaceIndex(nextIndex);
-    const nextSession = {
-      ...session,
-      lastProjectId: nextIndex.activeProjectId ?? targetProject.id
-    };
-    setWorkspaceSession(nextSession);
-    saveWorkspaceSession(nextSession);
+    const nextLastProjectId = nextIndex.activeProjectId ?? targetProject.id;
+
+    if (session.lastProjectId !== nextLastProjectId) {
+      const nextSession = {
+        ...session,
+        lastProjectId: nextLastProjectId
+      };
+      setWorkspaceSession(nextSession);
+      saveWorkspaceSession(nextSession);
+    }
+
     return nextIndex;
   };
 
@@ -146,7 +213,8 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     hydrationRef.current = true;
     const loaded = await loadWorkspaceProject(session, projectId);
     const mergedProject = mergeProjectSecrets(loaded.project, loaded.secrets, projectId);
-    setProject(mergedProject);
+    lastPersistedSnapshotRef.current = createWorkspacePersistenceSnapshot(mergedProject);
+    loadProjectWithoutHistory(mergedProject);
     const nextSession = { ...session, lastProjectId: projectId };
     setWorkspaceSession(nextSession);
     saveWorkspaceSession(nextSession);
@@ -166,7 +234,7 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
         : null;
 
       if (nextIndex.projects.length === 0 && normalizeUserName(session.userName).toLowerCase() === "yrsolo-dev") {
-        const seeded = seedWorkspaceFromExample();
+        const seeded = createDefaultProject();
         nextIndex = (await persistWorkspaceProject(
           seeded,
           { ...session, lastProjectId: seeded.id },
@@ -193,9 +261,11 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
       });
 
       if (activeProject) {
-        setProject(activeProject);
+        lastPersistedSnapshotRef.current = createWorkspacePersistenceSnapshot(activeProject);
+        loadProjectWithoutHistory(activeProject);
       } else {
-        setProject(createDefaultProject());
+        lastPersistedSnapshotRef.current = null;
+        loadProjectWithoutHistory(createDefaultProject());
       }
 
       setWorkspaceStatus("ready");
@@ -236,6 +306,11 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     }
 
     if (!workspaceIndex?.activeProjectId || workspaceIndex.activeProjectId !== project.id) {
+      return;
+    }
+
+    const currentSnapshot = createWorkspacePersistenceSnapshot(project);
+    if (lastPersistedSnapshotRef.current === currentSnapshot) {
       return;
     }
 
@@ -297,12 +372,13 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
   const signOut = () => {
     clearWorkspaceSession();
     clearDraft();
+    lastPersistedSnapshotRef.current = null;
     setWorkspaceSession(null);
     setWorkspaceIndex(null);
     setWorkspaceStatus("guest");
     setWorkspaceError(null);
     setAuthDraft((current) => ({ ...current, code: "" }));
-    setProject(createDefaultProject());
+    loadProjectWithoutHistory(createDefaultProject());
   };
 
   const selectWorkspaceProject = async (projectId: string) => {
@@ -335,7 +411,7 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     };
 
     hydrationRef.current = true;
-    setProject(nextProject);
+    loadProjectWithoutHistory(nextProject);
     hydrationRef.current = false;
     await persistWorkspaceProject(nextProject, workspaceSession, { setActive: true });
   };
@@ -363,7 +439,7 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     };
 
     hydrationRef.current = true;
-    setProject(duplicated);
+    loadProjectWithoutHistory(duplicated);
     hydrationRef.current = false;
     await persistWorkspaceProject(duplicated, workspaceSession, { setActive: true });
   };
@@ -382,7 +458,7 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     }
 
     hydrationRef.current = true;
-    setProject(createDefaultProject());
+    loadProjectWithoutHistory(createDefaultProject());
     hydrationRef.current = false;
   };
 
@@ -469,10 +545,26 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     if (!yamlImport.trim()) {
       return;
     }
-    const imported = importClashYaml(yamlImport);
-    setProject(imported);
-    if (!workspaceSession) {
-      clearDraft();
+    try {
+      const input = yamlImport.trim();
+      const parsed = input.startsWith("{")
+        ? configProjectSchema.parse(JSON.parse(input))
+        : importClashYaml(input);
+      const now = new Date().toISOString();
+      const imported: ConfigProject = {
+        ...parsed,
+        // Imports create a new project rather than silently overwriting an old publication.
+        id: crypto.randomUUID(),
+        nodes: parsed.nodes.map(node => node.kind === "globalSettings"
+          ? { ...node, settings: { ...node.settings, formatterUrl: node.settings.formatterUrl ?? getDefaultFormatterUrl() } }
+          : node),
+        meta: { ...parsed.meta, createdAt: now, updatedAt: now }
+      };
+      setProject(imported);
+      setImportError(null);
+      if (!workspaceSession) clearDraft();
+    } catch {
+      setImportError("Не удалось импортировать конфигурацию. Вставьте полный JSON проекта или корректный Clash YAML.");
     }
   };
 
@@ -667,6 +759,32 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     }
   };
 
+  const undo = () => {
+    const previousProject = pastProjects.at(-1);
+    if (!previousProject) {
+      return;
+    }
+
+    const currentProject = projectRef.current;
+    setPastProjects((current) => current.slice(0, -1));
+    setFutureProjects((current) => [currentProject, ...current].slice(0, PROJECT_HISTORY_LIMIT));
+    projectRef.current = previousProject;
+    setProjectState(previousProject);
+  };
+
+  const redo = () => {
+    const nextProject = futureProjects[0];
+    if (!nextProject) {
+      return;
+    }
+
+    const currentProject = projectRef.current;
+    setFutureProjects((current) => current.slice(1));
+    setPastProjects((current) => [...current.slice(-(PROJECT_HISTORY_LIMIT - 1)), currentProject]);
+    projectRef.current = nextProject;
+    setProjectState(nextProject);
+  };
+
   return {
     project,
     setProject,
@@ -679,11 +797,16 @@ export const useEditorProject = (initialProject?: ConfigProject | null) => {
     yamlPreviewStatus,
     validationIssues,
     yamlImport,
+    importError,
     setYamlImport,
     importYaml,
     publish,
     publishArtifact,
     resetToDemo,
+    undo,
+    redo,
+    canUndo: pastProjects.length > 0,
+    canRedo: futureProjects.length > 0,
     connectNodes,
     applyPreset,
     duplicateNode,

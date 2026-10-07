@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Check that the repository still follows the documentation architecture from `start.md`.
+Check that the repository still follows the documentation architecture from `AGENTS.md` and `docs/process/documentation-governance.md`.
 
 ## Verify
 

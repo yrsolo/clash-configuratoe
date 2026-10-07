@@ -12,7 +12,7 @@
 - `POST /api/workspace/projects/save`
 - `POST /api/workspace/projects/delete`
 - `POST /api/source/inspect`
-- `GET /api/formatter?url=<subscription-url>[&debug=1]`
+- `GET /api/formatter?url=<subscription-url>[&format=clash][&debug=1]`
 - `POST /api/published/save`
 - `POST /api/published/refresh`
 - `GET /api/published/project?id=<id>&token=<token>`

@@ -17,7 +17,8 @@ export const healthCheckSchema = z.object({
 });
 
 export const sourceFormatterSchema = z.object({
-  enabled: z.boolean().default(false)
+  enabled: z.boolean().default(false),
+  sourceFormat: z.enum(["legacy", "clash"]).optional()
 });
 
 const baseNodeShape = {
@@ -61,6 +62,14 @@ export const manualProxyNodeSchema = z.object({
     username: z.string().optional(),
     password: z.string().optional(),
     udp: z.boolean().optional()
+  })
+});
+
+export const vlessProxyNodeSchema = z.object({
+  ...baseNodeShape,
+  kind: z.literal("vlessProxy"),
+  vlessUrl: z.string().url().refine((value) => value.startsWith("vless://"), {
+    message: "VLESS node requires a vless:// URI."
   })
 });
 
@@ -137,6 +146,7 @@ export const globalSettingsNodeSchema = z.object({
 export const configNodeSchema = z.discriminatedUnion("kind", [
   proxyProviderNodeSchema,
   manualProxyNodeSchema,
+  vlessProxyNodeSchema,
   sourceMergeNodeSchema,
   proxyGroupNodeSchema,
   ruleSetNodeSchema,
@@ -212,6 +222,12 @@ export const projectSecretsEnvelopeSchema = z.object({
           username: z.string().optional(),
           password: z.string().optional()
         })
+      ).default({}),
+      vlessProxies: z.record(
+        z.string(),
+        z.object({
+          vlessUrl: z.string().url()
+        })
       ).default({})
     })
   ).default({})
@@ -235,6 +251,7 @@ export type Position = z.infer<typeof positionSchema>;
 export type Size = z.infer<typeof sizeSchema>;
 export type ProxyProviderNode = z.infer<typeof proxyProviderNodeSchema>;
 export type ManualProxyNode = z.infer<typeof manualProxyNodeSchema>;
+export type VlessProxyNode = z.infer<typeof vlessProxyNodeSchema>;
 export type SourceMergeNode = z.infer<typeof sourceMergeNodeSchema>;
 export type ProxyGroupNode = z.infer<typeof proxyGroupNodeSchema>;
 export type RuleSetNode = z.infer<typeof ruleSetNodeSchema>;

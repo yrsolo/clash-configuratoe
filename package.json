@@ -13,9 +13,14 @@
     "test": "npm run build --workspace @clash-configuratoe/schema && npm run test --workspace @clash-configuratoe/schema && npm run test --workspace @clash-configuratoe/web",
     "typecheck": "npm run typecheck --workspace @clash-configuratoe/schema && npm run typecheck --workspace @clash-configuratoe/web",
     "docs-check": "node scripts/docs-check.mjs",
-    "release-check": "npm run docs-check && npm run typecheck && npm run test && npm run build",
+    "schema:generate": "npm run build --workspace @clash-configuratoe/schema && node scripts/generate-schema.mjs",
+    "test:bridge": "npm --prefix serverless/workspace-bridge test",
+    "test:deploy": "node scripts/test-deploy.mjs",
+    "release-check": "npm run docs-check && npm run typecheck && npm run test && npm run test:bridge && npm run build",
     "bootstrap": "npm install",
-    "deploy:workspace-bridge": "powershell -ExecutionPolicy Bypass -File scripts/deploy-workspace-bridge.ps1"
+    "deploy:workspace-bridge": "powershell -ExecutionPolicy Bypass -File scripts/deploy-workspace-bridge.ps1",
+    "deploy:frontend": "powershell -ExecutionPolicy Bypass -File scripts/deploy-frontend.ps1",
+    "gateway:render": "node scripts/render-yandex-gateway.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

@@ -6,7 +6,7 @@ The canonical format is `ConfigProject` from `packages/schema`.
 
 It contains:
 
-- graph nodes for global settings, providers, manual proxies, merge nodes, groups, and rule sets
+- graph nodes for global settings, providers, manual proxies, VLESS links, merge nodes, groups, and rule sets
 - editor edges for semantic relationships
 - canvas groups for visual organization, including freeform visual panels and rule panels
 - lossless editor metadata such as positions, colors, comments, and enabled state
@@ -15,7 +15,7 @@ It contains:
 
 - Clash YAML for external use
 - publish records containing `projectId`, `shareUrl`, `yamlUrl`, and `qrPayload`
-- workspace secret envelopes that keep formatter URL, subscription URLs, and manual proxy credentials outside project JSON
+- workspace secret envelopes that keep formatter URL, subscription URLs, VLESS links, and manual proxy credentials outside the sanitized editing JSON (full published/exported records remain sensitive)
 - JSON exports of the full `ConfigProject` document for backup or transfer
 
 ## Round-Trip Rules

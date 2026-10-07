@@ -15,13 +15,13 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
+  builtInPresets,
   getVisibleRuleSections,
   transliterateLabel,
   type CanvasGroup,
   type ConfigNode,
   type ConfigProject,
   type RuleSetNode,
-  type ProxyProviderNode
 } from "@clash-configuratoe/schema";
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
@@ -38,7 +38,9 @@ import {
 } from "@/features/editor/flow";
 import { useEditorProject } from "@/features/editor/useEditorProject";
 import { loadPublishedProject, loadPublishedYaml } from "@/shared/publish";
-import { inspectSource, type SourceInspectResult } from "@/shared/sourceInspect";
+import { inspectSource, inspectVlessUri, type SourceInspectResult } from "@/shared/sourceInspect";
+
+type InspectableSourceNode = Extract<ConfigNode, { kind: "proxyProvider" | "vlessProxy" }>;
 
 const search = new URLSearchParams(window.location.search);
 const published = search.get("published");
@@ -55,10 +57,21 @@ const nodeKinds: ConfigNode["kind"][] = [
   "globalSettings",
   "proxyProvider",
   "manualProxy",
+  "vlessProxy",
   "sourceMerge",
   "proxyGroup",
   "ruleSet"
 ];
+
+const nodeKindLabels: Record<ConfigNode["kind"], string> = {
+  globalSettings: "Global settings",
+  proxyProvider: "Source",
+  manualProxy: "Manual proxy",
+  vlessProxy: "VLESS link",
+  sourceMerge: "Source merge",
+  proxyGroup: "Proxy group",
+  ruleSet: "Rule node"
+};
 
 const ruleSectionLabels: Record<RuleSectionKey, string> = {
   domains: "Domains",
@@ -194,11 +207,16 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     yamlPreviewStatus,
     validationIssues,
     yamlImport,
+    importError,
     setYamlImport,
     importYaml,
     publish,
     publishArtifact,
     resetToDemo,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     connectNodes,
     applyPreset,
     duplicateNode,
@@ -220,7 +238,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(project.canvasGroups[0]?.id ?? null);
   const [yamlPreviewExpanded, setYamlPreviewExpanded] = useState(false);
   const [sourceInspect, setSourceInspect] = useState<{
-    node: ProxyProviderNode;
+    node: InspectableSourceNode;
     status: "idle" | "loading" | "ready" | "error";
     data: SourceInspectResult | null;
     error: string | null;
@@ -243,6 +261,39 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
       }
     | null
   >(null);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isEditable =
+        target?.isContentEditable ||
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select";
+
+      if (isEditable) {
+        return;
+      }
+
+      const acceleratorPressed = event.ctrlKey || event.metaKey;
+      if (!acceleratorPressed || event.key.toLowerCase() !== "z") {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (event.shiftKey) {
+        redo();
+        return;
+      }
+
+      undo();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [redo, undo]);
 
   const setNodeEnabled = (nodeId: string, nextEnabled: boolean) => {
     updateNode(nodeId, (node) => ({ ...node, enabled: nextEnabled }));
@@ -499,7 +550,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     });
   };
 
-  const openSourceInspect = async (node: ProxyProviderNode) => {
+  const openSourceInspect = async (node: InspectableSourceNode) => {
     setSourceInspect({
       node,
       status: "loading",
@@ -508,7 +559,13 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     });
 
     try {
+      if (node.kind === "vlessProxy") {
+        setSourceInspect({ node, status: "ready", data: inspectVlessUri(node.vlessUrl), error: null });
+        return;
+      }
       const data = await inspectSource(node.subscriptionUrl, {
+        sourceFormat: node.formatter.sourceFormat,
+        providerKey: node.providerKey,
         runProbe: false
       });
       setSourceInspect({
@@ -527,16 +584,21 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     }
   };
 
-  const runSourceInspect = async (node: ProxyProviderNode) => {
+  const runSourceInspect = async (node: InspectableSourceNode) => {
+    if (node.kind !== "proxyProvider") {
+      return;
+    }
     setSourceInspect((current) => ({
       node,
       status: "loading",
-      data: current?.node.id === node.id ? current.data : null,
+      data: current && current.node.id === node.id ? current.data : null,
       error: null
     }));
 
     try {
       const data = await inspectSource(node.subscriptionUrl, {
+        sourceFormat: node.formatter.sourceFormat,
+        providerKey: node.providerKey,
         runProbe: true,
         probeUrl:
           globalSettingsNode?.kind === "globalSettings"
@@ -598,6 +660,38 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
     downloadJsonProject(project);
   };
 
+  const closeToolbarMenu = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const menu = target.closest("details");
+    if (menu instanceof HTMLDetailsElement) {
+      menu.open = false;
+    }
+  };
+
+  const createFromToolbar = (
+    event: MouseEvent<HTMLButtonElement>,
+    kind: ConfigNode["kind"] | "genericPanel" | "rulePanel"
+  ) => {
+    if (kind === "genericPanel" || kind === "rulePanel") {
+      addCanvasGroupAt(kind === "rulePanel" ? "rulePanel" : "generic", {
+        x: kind === "rulePanel" ? 120 : 80,
+        y: kind === "rulePanel" ? 120 : 80
+      });
+    } else {
+      addNode(kind);
+    }
+
+    closeToolbarMenu(event.currentTarget);
+  };
+
+  const applyPresetFromToolbar = (event: MouseEvent<HTMLButtonElement>, presetId: string) => {
+    applyPreset(presetId);
+    closeToolbarMenu(event.currentTarget);
+  };
+
   const createAtMenuPoint = (kind: ConfigNode["kind"] | "genericPanel" | "rulePanel") => {
     if (!contextMenu || contextMenu.mode !== "create") {
       return;
@@ -635,8 +729,8 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
       </header>
 
       <div className="workspace">
-        <aside className="sidebar">
-          <section className="panel">
+        <aside className="workspace-top-panels">
+          <section className="panel panel--workspace-access">
             <h2>Workspace Access</h2>
             {workspaceSession ? (
               <>
@@ -683,7 +777,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             {workspaceError ? <p className="issue-text">{workspaceError}</p> : null}
           </section>
 
-          <section className="panel">
+          <section className="panel panel--projects">
             <h2>Projects</h2>
             {workspaceSession && workspaceIndex ? (
               <div className="project-list">
@@ -718,7 +812,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             )}
           </section>
 
-          <section className="panel">
+          <section className="panel panel--starter">
             <h2>Starter Scene</h2>
             <p>
               {workspaceSession
@@ -737,52 +831,18 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             </button>
           </section>
 
-          <section className="panel">
-            <h2>Node Palette</h2>
-            <div className="button-grid">
-              {nodeKinds.map((kind) => (
-                <button key={kind} onClick={() => addNode(kind)}>
-                  Add {kind}
-                </button>
-              ))}
-              <button className="secondary" onClick={() => addCanvasGroupAt("generic", { x: 80, y: 80 })}>
-                Add visual panel
-              </button>
-              <button className="secondary" onClick={() => addCanvasGroupAt("rulePanel", { x: 120, y: 120 })}>
-                Add rule panel
-              </button>
-            </div>
-          </section>
-
-          <section className="panel">
-            <h2>Presets</h2>
-            <div className="preset-list">
-              {[
-                { id: "preset-ai", label: "AI Services" },
-                { id: "preset-telegram", label: "Telegram" },
-                { id: "preset-video", label: "Video" },
-                { id: "preset-torrents", label: "Torrents" },
-                { id: "preset-local-direct", label: "Local Direct" },
-                { id: "preset-rest", label: "Rest Of World" }
-              ].map((preset) => (
-                <button key={preset.id} className="secondary" onClick={() => applyPreset(preset.id)}>
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel">
-            <h2>Import YAML</h2>
+          <section className="panel panel--import">
+            <h2>Import JSON / YAML</h2>
             <textarea
               value={yamlImport}
               onChange={(event) => setYamlImport(event.target.value)}
-              placeholder="Paste a Clash YAML file here"
+              placeholder="Paste project JSON or Clash YAML here"
             />
             <button onClick={importYaml}>Import into graph</button>
+            {importError ? <p role="alert">{importError}</p> : null}
           </section>
 
-          <section className="panel">
+          <section className="panel panel--validation">
             <h2>Validation</h2>
             {validationIssues.length === 0 ? (
               <p className="ok">No graph issues detected.</p>
@@ -798,22 +858,76 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
 
         <main className="canvas-area">
           <div className="canvas-toolbar">
-            {workspaceSession ? (
-              <input
-                className="project-name-input"
-                value={project.name}
-                onChange={(event) =>
-                  setProject((current) => ({
-                    ...current,
-                    name: event.target.value,
-                    meta: { ...current.meta, updatedAt: new Date().toISOString() }
-                  }))
-                }
-              />
-            ) : (
-              <span>{project.name}</span>
-            )}
+            <div className="canvas-toolbar__top">
+              {workspaceSession ? (
+                <input
+                  className="project-name-input"
+                  value={project.name}
+                  onChange={(event) =>
+                    setProject((current) => ({
+                      ...current,
+                      name: event.target.value,
+                      meta: { ...current.meta, updatedAt: new Date().toISOString() }
+                    }))
+                  }
+                />
+              ) : (
+                <span className="canvas-toolbar__title">{project.name}</span>
+              )}
+              <div className="toolbar-dropdowns">
+                <details className="toolbar-menu">
+                  <summary>Добавить ноду</summary>
+                  <div className="toolbar-menu__list">
+                    {nodeKinds.map((kind) => (
+                      <button
+                        key={kind}
+                        type="button"
+                        className="ghost"
+                        onClick={(event) => createFromToolbar(event, kind)}
+                      >
+                        {nodeKindLabels[kind]}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={(event) => createFromToolbar(event, "genericPanel")}
+                    >
+                      Visual panel
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={(event) => createFromToolbar(event, "rulePanel")}
+                    >
+                      Rule panel
+                    </button>
+                  </div>
+                </details>
+                <details className="toolbar-menu">
+                  <summary>Добавить правило</summary>
+                  <div className="toolbar-menu__list">
+                    {builtInPresets.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        className="ghost"
+                        onClick={(event) => applyPresetFromToolbar(event, preset.id)}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            </div>
             <div className="toolbar-actions">
+              <button className="ghost" onClick={undo} disabled={!canUndo}>
+                Undo
+              </button>
+              <button className="ghost" onClick={redo} disabled={!canRedo}>
+                Redo
+              </button>
               <button className="ghost" onClick={exportProjectJson}>
                 Export JSON
               </button>
@@ -905,7 +1019,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
               }}
               onNodeDoubleClick={(_, node) => {
                 const configNode = project.nodes.find((entry) => entry.id === node.id);
-                if (configNode?.kind === "proxyProvider") {
+                if (configNode?.kind === "proxyProvider" || configNode?.kind === "vlessProxy") {
                   void openSourceInspect(configNode);
                 }
               }}
@@ -929,6 +1043,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
                 <button className="ghost" onClick={() => createAtMenuPoint("globalSettings")}>Create global settings</button>
                 <button className="ghost" onClick={() => createAtMenuPoint("proxyProvider")}>Create source</button>
                 <button className="ghost" onClick={() => createAtMenuPoint("manualProxy")}>Create manual proxy</button>
+                <button className="ghost" onClick={() => createAtMenuPoint("vlessProxy")}>Create VLESS link</button>
                 <button className="ghost" onClick={() => createAtMenuPoint("sourceMerge")}>Create merge</button>
                 <button className="ghost" onClick={() => createAtMenuPoint("proxyGroup")}>Create proxy group</button>
                 <button className="ghost" onClick={() => createAtMenuPoint("ruleSet")}>Create rule node</button>
@@ -943,8 +1058,8 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
           </div>
         </main>
 
-        <aside className="inspector">
-          <section className="panel">
+        <aside className="workspace-bottom-panels">
+          <section className="panel panel--inspector">
             <h2>Inspector</h2>
             {selectedNode ? (
               <NodeInspector
@@ -962,7 +1077,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             )}
           </section>
 
-          <section className="panel">
+          <section className="panel panel--yaml-preview">
             <button
               type="button"
               className="panel-title-button"
@@ -980,7 +1095,7 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
             <pre className="yaml-preview">{yamlPreview}</pre>
           </section>
 
-          <section className="panel">
+          <section className="panel panel--publish-result">
             <h2>Publish Result</h2>
             {publishArtifact ? (
               <div className="publish-card">
@@ -1055,24 +1170,28 @@ const EditorShell = ({ initialProject }: { initialProject: ConfigProject | null 
               <div>
                 <h2>{sourceInspect.node.label}</h2>
                 <p className="node-meta">
-                  Logical servers from the source subscription. Ping is measured by running the
-                  current health-check URL through each proxy tunnel, including detour when one is
-                  configured.
+                  {sourceInspect.node.kind === "vlessProxy"
+                    ? "Server decoded from the direct VLESS URI."
+                    : "Logical servers from the source subscription. Ping is measured by running the current health-check URL through each proxy tunnel, including detour when one is configured."}
                 </p>
-                <p className="node-meta">
-                  The site shows logical tunnel servers. Clash itself still sees wire-level helper
-                  proxies because `dialer-proxy` requires real helper entries in the generated YAML.
-                </p>
+                {sourceInspect.node.kind === "proxyProvider" ? (
+                  <p className="node-meta">
+                    The site shows logical tunnel servers. Clash itself still sees wire-level helper
+                    proxies because `dialer-proxy` requires real helper entries in the generated YAML.
+                  </p>
+                ) : null}
               </div>
               <div className="yaml-preview-modal__actions">
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => void runSourceInspect(sourceInspect.node)}
-                  disabled={sourceInspect.status === "loading"}
-                >
-                  {sourceInspect.status === "loading" ? "Running probe..." : "Run probe"}
-                </button>
+                {sourceInspect.node.kind === "proxyProvider" ? (
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() => void runSourceInspect(sourceInspect.node)}
+                    disabled={sourceInspect.status === "loading"}
+                  >
+                    {sourceInspect.status === "loading" ? "Running probe..." : "Run probe"}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="ghost"
@@ -1170,6 +1289,7 @@ const NodeInspector = ({
       {node.kind === "globalSettings" ? <GlobalSettingsFields node={node} onChange={onChange} /> : null}
       {node.kind === "proxyProvider" ? <ProxyProviderFields node={node} onChange={onChange} /> : null}
       {node.kind === "manualProxy" ? <ManualProxyFields node={node} onChange={onChange} /> : null}
+      {node.kind === "vlessProxy" ? <VlessProxyFields node={node} onChange={onChange} /> : null}
       {node.kind === "sourceMerge" ? <SourceMergeFields node={node} onChange={onChange} /> : null}
       {node.kind === "proxyGroup" ? <ProxyGroupFields node={node} onChange={onChange} /> : null}
       {node.kind === "ruleSet" ? <RuleSetFields node={node} onChange={onChange} /> : null}
@@ -1260,10 +1380,28 @@ const ProxyProviderFields = ({
         onChange={(event) => onChange({ ...node, subscriptionUrl: event.target.value })}
       />
     </label>
+    <label>
+      Формат подписки
+      <select
+        value={node.formatter.sourceFormat ?? "legacy"}
+        onChange={(event) => onChange({
+          ...node,
+          formatter: {
+            ...node.formatter,
+            sourceFormat: event.target.value as "legacy" | "clash",
+            enabled: event.target.value === "clash" || node.formatter.enabled
+          }
+        })}
+      >
+        <option value="legacy">Стандартный (VLESS / Xray)</option>
+        <option value="clash">Clash YAML (подписки для Happ)</option>
+      </select>
+    </label>
     <label className="checkbox-row">
       <input
         type="checkbox"
         checked={node.formatter.enabled}
+        disabled={node.formatter.sourceFormat === "clash"}
         onChange={(event) =>
           onChange({
             ...node,
@@ -1343,6 +1481,26 @@ const ManualProxyFields = ({
         }
       />
     </label>
+  </>
+);
+
+const VlessProxyFields = ({
+  node,
+  onChange
+}: {
+  node: Extract<ConfigNode, { kind: "vlessProxy" }>;
+  onChange: (next: ConfigNode) => void;
+}) => (
+  <>
+    <label>
+      VLESS URI
+      <textarea
+        value={node.vlessUrl}
+        onChange={(event) => onChange({ ...node, vlessUrl: event.target.value.trim() })}
+        placeholder="vless://uuid@server:443?security=reality&...#Name"
+      />
+    </label>
+    <p className="node-meta">The URI is saved as a workspace secret. It exports VLESS Reality fields supported by Clash/Mihomo.</p>
   </>
 );
 

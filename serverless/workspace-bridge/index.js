@@ -176,7 +176,8 @@ const getUrlString = (url) => {
 const shouldUseProxyForUrl = (targetUrl) => {
   try {
     const parsed = new URL(targetUrl);
-    return !["clash.solofarm.ru", "localhost", "127.0.0.1"].includes(parsed.hostname);
+    const appHost = process.env.PUBLIC_APP_URL ? new URL(process.env.PUBLIC_APP_URL).hostname : null;
+    return ![appHost, "localhost", "127.0.0.1"].includes(parsed.hostname);
   } catch {
     return true;
   }
@@ -450,8 +451,17 @@ const extractVlessYaml = (rawText) => {
   return yamlOutput;
 };
 
-const formatSubscriptionToYaml = (rawText) => {
+const formatSubscriptionToYaml = (rawText, sourceFormat = "legacy") => {
   const cleanText = normalizeFetchedText(rawText);
+
+  if (sourceFormat === "clash") {
+    const parsed = YAML.parse(cleanText);
+    const proxies = parsed?.proxies;
+    if (!Array.isArray(proxies) || proxies.length === 0 || !proxies.every(looksLikeProxyEntry)) {
+      throw new Error("The provider did not return a non-empty Clash proxies list. Check the subscription format.");
+    }
+    return quoteSensitiveYamlScalars(YAML.stringify({ proxies }));
+  }
 
   if (isYamlProxyList(cleanText)) {
     return cleanText;
@@ -547,11 +557,11 @@ const waitForPort = async (port, timeoutMs = 5000) => {
   throw new Error(`Proxy runtime did not open local port ${port}.`);
 };
 
-const fetchFormatterSource = async (targetUrl) => {
-  const response = await proxyFetch(targetUrl, {
+const fetchFormatterSource = async (targetUrl, sourceFormat = "legacy", fetcher = proxyFetch) => {
+  const response = await fetcher(targetUrl, {
     dispatcher: shouldUseProxyForUrl(targetUrl) ? formatterProxyAgent ?? undefined : undefined,
     headers: {
-      "User-Agent": "v2rayN/6.33",
+      "User-Agent": sourceFormat === "clash" ? "clash-verge/v2.4.0" : "v2rayN/6.33",
       Accept: "*/*"
     }
   });
@@ -616,7 +626,7 @@ const dedupeProxiesByName = (proxies) => {
   return deduped;
 };
 
-const materializeSubscriptionBackedYaml = async (yamlText, fetcher = fetchFormatterSource) => {
+const materializeSubscriptionBackedYaml = async (yamlText, fetcher = fetchFormatterSource, project = null) => {
   const parsed = YAML.parse(yamlText);
   const providerConfigs = Object.entries(parsed?.["proxy-providers"] ?? {});
 
@@ -631,15 +641,32 @@ const materializeSubscriptionBackedYaml = async (yamlText, fetcher = fetchFormat
     const providerUrl = getUrlString(providerConfig?.url);
     const providerYaml = await fetcher(providerUrl);
     const providerProxies = applyProviderProxyFilters(extractProxyList(providerYaml), providerConfig);
+    // Older published YAML predates additional-prefix. Resolve generated filter
+    // keys against the saved project instead of displaying their numeric suffix.
+    const originalKeys = (project?.nodes ?? [])
+      .filter((node) => node.kind === "proxyProvider" && typeof node.providerKey === "string")
+      .map((node) => node.providerKey);
+    const originalKey = originalKeys.includes(providerKey) ? providerKey : originalKeys
+      .filter((key) => providerKey.startsWith(`${key}_`) && /^\d+$/.test(providerKey.slice(key.length + 1)))
+      .sort((left, right) => right.length - left.length)[0] ?? providerKey;
+    const prefix = providerConfig?.override?.["additional-prefix"] ?? `${originalKey} `;
+    const names = new Map(providerProxies.map((proxy) => [proxy.name, `${prefix}${proxy.name}`]));
+    const renamedProxies = providerProxies.map((proxy) => ({
+      ...proxy,
+      name: names.get(proxy.name),
+      ...(names.has(proxy["dialer-proxy"])
+        ? { "dialer-proxy": names.get(proxy["dialer-proxy"]) }
+        : {})
+    }));
 
     visibleProxyNamesByProvider.set(
       providerKey,
       providerProxies
         .filter((proxy) => !String(proxy?.name ?? "").startsWith("__dialer__"))
-        .map((proxy) => String(proxy.name))
+        .map((proxy) => names.get(proxy.name))
     );
 
-    allProxies.push(...providerProxies);
+    allProxies.push(...renamedProxies);
   }
 
   parsed.proxies = dedupeProxiesByName(allProxies);
@@ -682,7 +709,7 @@ const refreshPublishedRecord = async (record) => {
     throw new Error("Published record is missing source YAML.");
   }
 
-  const materializedYaml = await materializeSubscriptionBackedYaml(sourceYaml);
+  const materializedYaml = await materializeSubscriptionBackedYaml(sourceYaml, fetchFormatterSource, record.project);
   const refreshedAt = new Date().toISOString();
   const nextRecord = {
     ...record,
@@ -976,13 +1003,14 @@ const inspectProxyYaml = async (yamlText, probeUrl) => {
 
 const handleFormatterRequest = async (query) => {
   const targetUrl = getUrlString(query.url);
-  const rawText = await fetchFormatterSource(targetUrl);
+  const sourceFormat = query.format === "clash" ? "clash" : "legacy";
+  const rawText = await fetchFormatterSource(targetUrl, sourceFormat);
 
   if ("debug" in query) {
     return plainText(200, rawText);
   }
 
-  const yamlText = formatSubscriptionToYaml(rawText);
+  const yamlText = formatSubscriptionToYaml(rawText, sourceFormat);
 
   if ("inspect" in query) {
     const proxies = await inspectProxyYaml(yamlText, getGlobalProbeUrl(query.probeUrl));
@@ -1168,8 +1196,9 @@ export const handler = async (event) => {
 
     if (method === "POST" && matchesRoute("/source/inspect")) {
       const targetUrl = getUrlString(body.url);
-      const rawText = await fetchFormatterSource(targetUrl);
-      const yamlText = formatSubscriptionToYaml(rawText);
+      const sourceFormat = body.format === "clash" ? "clash" : "legacy";
+      const rawText = await fetchFormatterSource(targetUrl, sourceFormat);
+      const yamlText = formatSubscriptionToYaml(rawText, sourceFormat);
       const probeUrl = body.runProbe ? getGlobalProbeUrl(body.probeUrl) : undefined;
       const proxies = await inspectProxyYaml(yamlText, probeUrl);
       return json(200, {
@@ -1330,6 +1359,7 @@ export const handler = async (event) => {
 };
 
 export {
+  fetchFormatterSource,
   buildLogicalInspectTargets,
   buildLogicalTunnelProxies,
   extractProxyList,

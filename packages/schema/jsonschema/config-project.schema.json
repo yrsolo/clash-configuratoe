@@ -1,62 +1,830 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://clash-configuratoe.local/schema/config-project.schema.json",
-  "title": "ConfigProject",
   "type": "object",
-  "required": ["id", "name", "nodes", "edges", "canvasGroups", "meta"],
   "properties": {
-    "id": { "type": "string" },
-    "name": { "type": "string" },
-    "description": { "type": "string" },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "type": "string"
+    },
     "nodes": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["id", "kind", "position", "label"],
-        "properties": {
-          "id": { "type": "string" },
-          "kind": {
-            "type": "string",
-            "enum": ["proxyProvider", "manualProxy", "proxyGroup", "ruleSet"]
-          },
-          "label": { "type": "string" },
-          "position": {
+        "oneOf": [
+          {
             "type": "object",
-            "required": ["x", "y"],
             "properties": {
-              "x": { "type": "number" },
-              "y": { "type": "number" }
-            }
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "proxyProvider"
+              },
+              "providerKey": {
+                "type": "string"
+              },
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "http"
+                ]
+              },
+              "subscriptionUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "resolverMode": {
+                "default": "stub",
+                "type": "string",
+                "enum": [
+                  "stub",
+                  "serverless"
+                ]
+              },
+              "interval": {
+                "default": 3600,
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "path": {
+                "default": "./provider.yaml",
+                "type": "string"
+              },
+              "healthCheck": {
+                "default": {
+                  "enable": true,
+                  "interval": 600,
+                  "url": "http://www.gstatic.com/generate_204"
+                },
+                "type": "object",
+                "properties": {
+                  "enable": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "interval": {
+                    "default": 600,
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "url": {
+                    "default": "http://www.gstatic.com/generate_204",
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "formatter": {
+                "default": {
+                  "enabled": false
+                },
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "sourceFormat": {
+                    "type": "string",
+                    "enum": [
+                      "legacy",
+                      "clash"
+                    ]
+                  }
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "providerKey",
+              "sourceType",
+              "subscriptionUrl"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "manualProxy"
+              },
+              "proxy": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "http",
+                      "socks5"
+                    ]
+                  },
+                  "server": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "udp": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type",
+                  "server",
+                  "port"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "proxy"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "vlessProxy"
+              },
+              "vlessUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^vless://"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "vlessUrl"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "sourceMerge"
+              },
+              "merge": {
+                "type": "object",
+                "properties": {
+                  "strategy": {
+                    "default": "combine",
+                    "type": "string",
+                    "enum": [
+                      "combine"
+                    ]
+                  },
+                  "filterEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "filterTerms": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "invert": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "merge"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "proxyGroup"
+              },
+              "group": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "includeDirect": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "autoSelect": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "catchAll": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "customHealthCheckEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "customHealthCheckUrl": {
+                    "default": "http://www.gstatic.com/generate_204",
+                    "type": "string"
+                  },
+                  "interval": {
+                    "default": 300,
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "tolerance": {
+                    "default": 300,
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "group"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "ruleSet"
+              },
+              "ruleSet": {
+                "type": "object",
+                "properties": {
+                  "visibleSections": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "domains",
+                        "domainSuffixes",
+                        "domainKeywords",
+                        "geosites",
+                        "geoips",
+                        "processNames",
+                        "ipCidrs",
+                        "rawRules",
+                        "match"
+                      ]
+                    }
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "first": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "domains": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "domainSuffixes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "domainKeywords": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "geosites": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "geoips": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "processNames": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ipCidrs": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "rawRules": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "match": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "ruleSet"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "collapsed": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "canvasGroupId": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "globalSettings"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "sourceUpdateInterval": {
+                    "default": 3600,
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sourceHealthCheckInterval": {
+                    "default": 600,
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "healthCheckUrl": {
+                    "default": "http://www.gstatic.com/generate_204",
+                    "type": "string"
+                  },
+                  "formatterUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "position",
+              "kind",
+              "settings"
+            ]
           }
-        }
+        ]
       }
     },
     "edges": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "source", "target", "kind"],
         "properties": {
-          "id": { "type": "string" },
-          "source": { "type": "string" },
-          "target": { "type": "string" },
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
           "kind": {
             "type": "string",
-            "enum": ["group-source", "ruleset-target"]
+            "enum": [
+              "group-source",
+              "ruleset-target"
+            ]
           }
-        }
+        },
+        "required": [
+          "id",
+          "source",
+          "target",
+          "kind"
+        ]
       }
     },
     "canvasGroups": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "label", "position", "size"],
         "properties": {
-          "id": { "type": "string" },
-          "label": { "type": "string" }
-        }
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "role": {
+            "default": "rulePanel",
+            "type": "string",
+            "enum": [
+              "generic",
+              "rulePanel"
+            ]
+          },
+          "color": {
+            "default": "#dbeafe",
+            "type": "string"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ]
+          },
+          "size": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "width",
+              "height"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "position",
+          "size"
+        ]
       }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "createdAt",
+        "updatedAt"
+      ]
     }
-  }
+  },
+  "required": [
+    "id",
+    "name",
+    "nodes",
+    "edges",
+    "canvasGroups",
+    "meta"
+  ],
+  "$id": "https://clash-configuratoe.local/schema/config-project.schema.json",
+  "title": "ConfigProject"
 }

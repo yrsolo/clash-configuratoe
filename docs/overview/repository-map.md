@@ -16,9 +16,9 @@
 
 ## Typical Reading Order
 
-1. [README.md](/n:/PROJECTS/service/clash-configuratoe/README.md)
-2. [docs/README.md](/n:/PROJECTS/service/clash-configuratoe/docs/README.md)
-3. [docs/overview/product.md](/n:/PROJECTS/service/clash-configuratoe/docs/overview/product.md)
-4. [docs/architecture/system-overview.md](/n:/PROJECTS/service/clash-configuratoe/docs/architecture/system-overview.md)
-5. [agent/OPERATING_CONTRACT.md](/n:/PROJECTS/service/clash-configuratoe/agent/OPERATING_CONTRACT.md)
-6. [docs/reference/config-format.md](/n:/PROJECTS/service/clash-configuratoe/docs/reference/config-format.md)
+1. [README.md](../../readme.md)
+2. [docs/README.md](../README.md)
+3. [docs/overview/product.md](product.md)
+4. [docs/architecture/system-overview.md](../architecture/system-overview.md)
+5. [agent/OPERATING_CONTRACT.md](../../agent/OPERATING_CONTRACT.md)
+6. [docs/reference/config-format.md](../reference/config-format.md)

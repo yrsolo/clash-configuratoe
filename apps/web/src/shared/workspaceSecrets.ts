@@ -1,7 +1,7 @@
+import { getDefaultFormatterUrl } from "@clash-configuratoe/schema";
 import type { ConfigProject, ProjectSecretsEnvelope } from "@clash-configuratoe/schema";
 
 const redactedSubscriptionUrl = "https://workspace.invalid/subscription";
-const formatterRoute = "https://clash.solofarm.ru/api/formatter";
 
 const normalizeFormatterUrl = (value: string | undefined) => {
   if (!value) {
@@ -15,10 +15,11 @@ const normalizeFormatterUrl = (value: string | undefined) => {
 
   if (
     normalized.includes("formatter.invalid") ||
+    normalized.includes("clash.solofarm.ru") ||
     normalized.includes("vless-extractor.") ||
     normalized.includes("workers.dev")
   ) {
-    return formatterRoute;
+    return getDefaultFormatterUrl();
   }
 
   return normalized;
@@ -32,9 +33,10 @@ export const extractProjectSecrets = (
   const secrets: ProjectSecretsEnvelope = {
     projects: {
       [projectId]: {
-        global: {},
-        providers: {},
-        manualProxies: {}
+      global: {},
+      providers: {},
+      manualProxies: {},
+      vlessProxies: {}
       }
     }
   };
@@ -61,6 +63,11 @@ export const extractProjectSecrets = (
       };
       delete node.proxy.username;
       delete node.proxy.password;
+    }
+
+    if (node.kind === "vlessProxy") {
+      targetSecrets.vlessProxies[node.id] = { vlessUrl: node.vlessUrl };
+      node.vlessUrl = "vless://00000000-0000-0000-0000-000000000000@workspace.invalid:443?type=tcp#Redacted";
     }
   }
 
@@ -99,6 +106,10 @@ export const mergeProjectSecrets = (
         node.proxy.username = proxySecrets.username;
         node.proxy.password = proxySecrets.password;
       }
+    }
+
+    if (node.kind === "vlessProxy" && targetSecrets.vlessProxies[node.id]?.vlessUrl) {
+      node.vlessUrl = targetSecrets.vlessProxies[node.id].vlessUrl;
     }
   }
 

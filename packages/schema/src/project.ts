@@ -1,3 +1,4 @@
+import { getDefaultFormatterUrl } from "./formatter";
 import { builtInPresets } from "./presets";
 import type {
   CanvasGroup,
@@ -93,7 +94,7 @@ export const classifyEdgeKind = (
   targetKind: string
 ): GraphEdge["kind"] | null => {
   if (
-    ["proxyProvider", "manualProxy", "sourceMerge", "proxyGroup"].includes(sourceKind) &&
+    ["proxyProvider", "manualProxy", "vlessProxy", "sourceMerge", "proxyGroup"].includes(sourceKind) &&
     ["sourceMerge", "proxyGroup"].includes(targetKind)
   ) {
     return "group-source";
@@ -171,7 +172,7 @@ export const createDemoProject = (): ConfigProject => {
       sourceUpdateInterval: 3600,
       sourceHealthCheckInterval: 600,
       healthCheckUrl: "http://www.gstatic.com/generate_204",
-      formatterUrl: "https://clash.solofarm.ru/api/formatter"
+      formatterUrl: getDefaultFormatterUrl()
     }
   };
 
@@ -185,7 +186,7 @@ export const createDemoProject = (): ConfigProject => {
     providerKey: "lib_auto",
     sourceType: "http",
     subscriptionUrl:
-      "https://connliberty.com/connection/subs/23213932-1a03-4c0e-b80b-51ae3384edc7",
+      "https://subscription.invalid/replace-with-your-subscription",
     resolverMode: "stub",
     interval: 3600,
     path: "./lib_auto.yaml",
@@ -209,7 +210,7 @@ export const createDemoProject = (): ConfigProject => {
     proxy: {
       name: "Personal_HTTP",
       type: "http" as const,
-      server: "195.158.194.74",
+      server: "proxy.invalid",
       port: 8000,
       username: "demo",
       password: "demo"
@@ -310,7 +311,10 @@ export const createDemoProject = (): ConfigProject => {
     "preset-local-direct": directPanel,
     "preset-ai": aiPanel,
     "preset-telegram": telegramPanel,
-    "preset-video": mediaPanel,
+    "preset-youtube": mediaPanel,
+    "preset-meta": mediaPanel,
+    "preset-russian-banks": directPanel,
+    "preset-russian-services": directPanel,
     "preset-torrents": mediaPanel,
     "preset-rest": fallbackPanel
   };

@@ -17,6 +17,7 @@ type PanelData = {
 const kindTitles: Record<ConfigNode["kind"], string> = {
   proxyProvider: "Source",
   manualProxy: "Manual",
+  vlessProxy: "VLESS",
   sourceMerge: "Merge",
   proxyGroup: "Group",
   ruleSet: "Rules",
@@ -26,6 +27,7 @@ const kindTitles: Record<ConfigNode["kind"], string> = {
 const nodeColors: Record<ConfigNode["kind"], string> = {
   proxyProvider: "#d1fae5",
   manualProxy: "#fee2e2",
+  vlessProxy: "#ede9fe",
   sourceMerge: "#e0e7ff",
   proxyGroup: "#dbeafe",
   ruleSet: "#fef3c7",
@@ -35,6 +37,7 @@ const nodeColors: Record<ConfigNode["kind"], string> = {
 const getMainLabel = (node: ConfigNode) => {
   if (node.kind === "proxyGroup") return node.group.name;
   if (node.kind === "manualProxy") return node.proxy.name;
+  if (node.kind === "vlessProxy") return node.label;
   if (node.kind === "ruleSet") return node.ruleSet.name;
   return node.label;
 };
@@ -45,6 +48,8 @@ const getMeta = (node: ConfigNode) => {
       return node.providerKey;
     case "manualProxy":
       return `${node.proxy.server}:${node.proxy.port}`;
+    case "vlessProxy":
+      return "VLESS Reality URI";
     case "sourceMerge":
       return node.merge.filterEnabled
         ? `${node.merge.invert ? "keep" : "hide"}: ${node.merge.filterTerms.join(", ")}`
@@ -105,7 +110,7 @@ export const EditorNode = ({ data }: NodeProps) => {
         </>
       ) : null}
 
-      {node.kind === "proxyProvider" || node.kind === "manualProxy" || node.kind === "sourceMerge" ? (
+      {node.kind === "proxyProvider" || node.kind === "manualProxy" || node.kind === "vlessProxy" || node.kind === "sourceMerge" ? (
         <>
           {node.kind === "sourceMerge" ? (
             <Handle

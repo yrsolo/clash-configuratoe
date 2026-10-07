@@ -1,29 +1,111 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createDemoProject } from "@clash-configuratoe/schema";
+import starterProject from "../../../default/new.json";
 
 import { App } from "../src/app/App";
+import { saveWorkspaceSession } from "../src/shared/workspaceAuth";
+import { loadDraft } from "../src/shared/storage";
+
+const initialGroupCount = starterProject.nodes.filter(node => node.kind === "proxyGroup").length;
+const initialRuleCount = starterProject.nodes.filter(node => node.kind === "ruleSet").length;
 
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
 describe("App", () => {
+  it("restores exported JSON with its layout and sources under a new project identity", async () => {
+    render(<App />);
+    const user = userEvent.setup();
+    const backup = { ...structuredClone(starterProject), id: "old-published-project", name: "Restored backup" };
+    fireEvent.change(screen.getByPlaceholderText("Paste project JSON or Clash YAML here"), { target: { value: JSON.stringify(backup) } });
+    await user.click(screen.getByRole("button", { name: "Import into graph" }));
+    await waitFor(() => expect(loadDraft()?.name).toBe("Restored backup"));
+    const stored = loadDraft()!;
+    expect(stored.name).toBe("Restored backup");
+    expect(stored.id).not.toBe(backup.id);
+    expect(stored.edges).toEqual(backup.edges);
+    expect(stored.canvasGroups).toEqual(backup.canvasGroups);
+    expect(stored.nodes.filter((node: { kind: string }) => node.kind !== "globalSettings")).toEqual(backup.nodes.filter(node => node.kind !== "globalSettings"));
+  });
+
+  it("keeps the current project and shows an error for invalid JSON", async () => {
+    render(<App />);
+    fireEvent.change(screen.getByPlaceholderText("Paste project JSON or Clash YAML here"), { target: { value: '{"nodes":' } });
+    await userEvent.setup().click(screen.getByRole("button", { name: "Import into graph" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Не удалось импортировать");
+    expect(screen.getByText(`${initialGroupCount} groups`)).toBeInTheDocument();
+  });
+
   it("renders the editor hero", () => {
     render(<App />);
     expect(screen.getByText(/Build and publish Clash configs visually/i)).toBeInTheDocument();
   });
 
-  it("adds a new proxy group from the palette", async () => {
+  it("adds a new proxy group from the toolbar dropdown", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    expect(screen.getByText("6 groups")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Add proxyGroup" }));
+    expect(screen.getByText(`${initialGroupCount} groups`)).toBeInTheDocument();
+    await user.click(screen.getByText("Добавить ноду"));
+    await user.click(screen.getByRole("button", { name: "Proxy group" }));
 
-    expect(screen.getByText("7 groups")).toBeInTheDocument();
+    expect(screen.getByText(`${initialGroupCount + 1} groups`)).toBeInTheDocument();
+  });
+
+  it("adds a VLESS link node from the toolbar dropdown", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByText("Добавить ноду"));
+    await user.click(screen.getByRole("button", { name: "VLESS link" }));
+
+    expect(screen.getByText("VLESS Reality")).toBeInTheDocument();
+  });
+
+  it("shows the server inside a VLESS link node on double click", async () => {
+    render(<App />);
+
+    await userEvent.setup().click(screen.getByText("Добавить ноду"));
+    await userEvent.setup().click(screen.getByRole("button", { name: "VLESS link" }));
+    fireEvent.doubleClick(screen.getByText("VLESS Reality"));
+
+    expect(await screen.findByRole("dialog", { name: "Source servers" })).toBeInTheDocument();
+    expect(screen.getByText("example.com:443")).toBeInTheDocument();
+    expect(screen.getByText("1 logical servers")).toBeInTheDocument();
+  });
+
+  it("adds a preset rule node from the toolbar dropdown", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByText(`${initialRuleCount} rule nodes`)).toBeInTheDocument();
+    await user.click(screen.getByText("Добавить правило"));
+    await user.click(screen.getByRole("button", { name: "Russian Services" }));
+
+    expect(screen.getByText(`${initialRuleCount + 1} rule nodes`)).toBeInTheDocument();
+  });
+
+  it("supports undo and redo for project edits", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByText(`${initialGroupCount} groups`)).toBeInTheDocument();
+
+    await user.click(screen.getByText("Добавить ноду"));
+    await user.click(screen.getByRole("button", { name: "Proxy group" }));
+    expect(screen.getByText(`${initialGroupCount + 1} groups`)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+    expect(screen.getByText(`${initialGroupCount} groups`)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Redo" }));
+    expect(screen.getByText(`${initialGroupCount + 1} groups`)).toBeInTheDocument();
   });
 
   it("removes an edge on double click", async () => {
@@ -137,11 +219,11 @@ describe("App", () => {
 
     render(<App />);
 
-    const sourceNode = screen.getByText("lib_json");
+    const sourceNode = screen.getByText("Subscription 1");
     fireEvent.doubleClick(sourceNode);
 
     expect(await screen.findByRole("dialog", { name: "Source servers" })).toBeInTheDocument();
-    expect(await screen.findByText("Test node")).toBeInTheDocument();
+    expect(await screen.findByText("source_1 Test node")).toBeInTheDocument();
     expect(screen.getByText("n/a")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/api/source/inspect"),
@@ -160,5 +242,67 @@ describe("App", () => {
         method: "POST"
       })
     );
+  });
+
+  it("does not autosave a restored workspace project without user edits", async () => {
+    const project = createDemoProject();
+    const session = {
+      userName: "loop-check",
+      userKey: "workspace-user-key",
+      lastProjectId: project.id
+    };
+    const fetchMock = vi.spyOn(window, "fetch");
+
+    saveWorkspaceSession(session);
+
+    fetchMock.mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : String(input.url);
+
+      if (url.includes("/api/workspace/session/restore")) {
+        return new Response(
+          JSON.stringify({
+            session,
+            index: {
+              userName: session.userName,
+              createdAt: project.meta.createdAt,
+              updatedAt: project.meta.updatedAt,
+              activeProjectId: project.id,
+              projects: [
+                {
+                  id: project.id,
+                  name: project.name,
+                  description: project.description,
+                  updatedAt: project.meta.updatedAt,
+                  isDefault: false,
+                  source: "workspace"
+                }
+              ]
+            },
+            activeProject: project,
+            secrets: null
+          }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        ) as Response;
+      }
+
+      throw new Error(`Unexpected fetch in test: ${url}`);
+    });
+
+    render(<App />);
+
+    await screen.findByText(/Build and publish Clash configs visually/i);
+    await new Promise((resolve) => window.setTimeout(resolve, 1200));
+
+    const saveCalls = fetchMock.mock.calls.filter(([input]) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : String(input.url);
+      return url.includes("/api/workspace/projects/save");
+    });
+
+    expect(saveCalls).toHaveLength(0);
   });
 });

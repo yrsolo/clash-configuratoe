@@ -7,6 +7,7 @@ import YAML from "yaml";
 
 import {
   buildLogicalInspectTargets,
+  fetchFormatterSource,
   buildLogicalTunnelProxies,
   formatSubscriptionToYaml,
   materializeSubscriptionBackedYaml,
@@ -17,6 +18,45 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturePath = join(__dirname, "fixtures", "connliberty-tunnel.sample.json");
 
 const readFixture = async () => readFile(fixturePath, "utf-8");
+
+test("native Clash negotiation preserves mixed protocols through publishing", async () => {
+  const proxies = [
+    { name: "HY2", type: "hysteria2", server: "hy.example.com", port: 443, password: "sample-only" },
+    { name: "XHTTP", type: "vless", server: "x.example.com", port: 443,
+      uuid: "11111111-2222-3333-4444-555555555555", network: "xhttp", tls: true,
+      "xhttp-opts": { path: "/example", mode: "auto", extra: { noGRPCHeader: true } },
+      "reality-opts": { "public-key": "sample-key", "short-id": "001122" } }
+  ];
+  const source = YAML.stringify({ proxies, rules: ["MATCH,DIRECT"], "mixed-port": 9999 });
+  const raw = await fetchFormatterSource("https://subscription.example/feed", "clash", async (_url, options) => {
+    assert.equal(options.headers["User-Agent"], "clash-verge/v2.4.0");
+    return new Response(source);
+  });
+  const feed = formatSubscriptionToYaml(raw, "clash");
+  assert.deepEqual(YAML.parse(feed), { proxies });
+  const config = YAML.stringify({
+    "proxy-providers": { native: { url: "https://formatter.example/?format=clash" } },
+    "proxy-groups": [{ name: "Mine", type: "select", use: ["native"] }],
+    rules: ["MATCH,Mine"]
+  });
+  const published = YAML.parse(await materializeSubscriptionBackedYaml(config, async () => feed));
+  assert.deepEqual(published.proxies, proxies.map(proxy => ({ ...proxy, name: `native ${proxy.name}` })));
+  assert.deepEqual(published.rules, ["MATCH,Mine"]);
+  assert.deepEqual(published["proxy-groups"][0].proxies, ["native HY2", "native XHTTP"]);
+});
+
+test("native Clash rejects empty and non-Clash responses", () => {
+  for (const raw of ["proxies: []", "<html>Subscribe</html>", "dmxlc3M6Ly9leGFtcGxl", "proxies: [{name: incomplete}]"]) {
+    assert.throws(() => formatSubscriptionToYaml(raw, "clash"));
+  }
+});
+
+test("existing subscriptions keep the legacy request agent", async () => {
+  await fetchFormatterSource("https://subscription.example/feed", undefined, async (_url, options) => {
+    assert.equal(options.headers["User-Agent"], "v2rayN/6.33");
+    return new Response("sample");
+  });
+});
 
 test("formats tunnel bundles into logical proxies with internal helper names", async () => {
   const raw = await readFixture();
@@ -149,7 +189,43 @@ test("materializes provider-backed yaml into static proxies while keeping helper
   const parsed = YAML.parse(providerYaml);
   assert.equal(parsed["proxy-providers"], undefined);
   assert.equal(parsed["proxy-groups"][0].use, undefined);
-  assert.deepEqual(parsed["proxy-groups"][0].proxies, ["DIRECT", "Personal_HTTP", "Italy bypass"]);
-  assert.equal(parsed.proxies.some((entry) => entry.name === "__dialer__abc123def456"), true);
-  assert.equal(parsed.proxies.some((entry) => entry.name === "Italy bypass"), true);
+  assert.deepEqual(parsed["proxy-groups"][0].proxies, ["DIRECT", "Personal_HTTP", "lib_auto Italy bypass"]);
+  assert.equal(parsed.proxies.some((entry) => entry.name === "lib_auto __dialer__abc123def456"), true);
+  assert.equal(parsed.proxies.find((entry) => entry.name === "lib_auto Italy bypass")["dialer-proxy"], "lib_auto __dialer__abc123def456");
+});
+
+test("keeps same-named servers and dialers isolated across providers", async () => {
+  const source = YAML.stringify({ proxies: [
+    { name: "__dialer__shared", type: "socks5", server: "relay.example", port: 1080 },
+    { name: "Germany", type: "vless", server: "de.example", port: 443, "dialer-proxy": "__dialer__shared" }
+  ] });
+  const config = YAML.stringify({
+    "proxy-providers": {
+      A_filtered: { url: "https://a.example/feed", override: { "additional-prefix": "A " } },
+      B: { url: "https://b.example/feed" }
+    },
+    "proxy-groups": [{ name: "All", use: ["A_filtered", "B"] }]
+  });
+  const result = YAML.parse(await materializeSubscriptionBackedYaml(config, async () => source));
+  assert.equal(result.proxies.length, 4);
+  assert.deepEqual(result["proxy-groups"][0].proxies, ["A Germany", "B Germany"]);
+  for (const key of ["A", "B"]) {
+    assert.equal(result.proxies.find(proxy => proxy.name === `${key} Germany`)["dialer-proxy"], `${key} __dialer__shared`);
+  }
+});
+
+test("old published filter keys use saved Provider keys without stripping intentional digits", async () => {
+  const project = { nodes: [
+    { kind: "proxyProvider", providerKey: "lib_" },
+    { kind: "proxyProvider", providerKey: "PO_" },
+    { kind: "proxyProvider", providerKey: "vpn_123" }
+  ] };
+  const config = YAML.stringify({
+    "proxy-providers": Object.fromEntries(["lib__9177", "PO__9177", "vpn_123"].map(key => [key, { url: "https://source.example/feed" }])),
+    "proxy-groups": [{ name: "All", use: ["lib__9177", "PO__9177", "vpn_123"] }]
+  });
+  const result = YAML.parse(await materializeSubscriptionBackedYaml(config, async () => YAML.stringify({
+    proxies: [{ name: "Germany", type: "socks5", server: "test.example", port: 1080 }]
+  }), project));
+  assert.deepEqual(result["proxy-groups"][0].proxies, ["lib_ Germany", "PO_ Germany", "vpn_123 Germany"]);
 });

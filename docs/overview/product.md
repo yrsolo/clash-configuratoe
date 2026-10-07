@@ -25,6 +25,6 @@ Manual Clash YAML quickly becomes hard to reason about when providers, groups, a
 
 ## Next Reading
 
-- [Getting Started](/n:/PROJECTS/service/clash-configuratoe/docs/overview/getting-started.md)
-- [System Overview](/n:/PROJECTS/service/clash-configuratoe/docs/architecture/system-overview.md)
-- [Config Format](/n:/PROJECTS/service/clash-configuratoe/docs/reference/config-format.md)
+- [Getting Started](getting-started.md)
+- [System Overview](../architecture/system-overview.md)
+- [Config Format](../reference/config-format.md)

@@ -10,9 +10,10 @@
 
 ## Main UI Areas
 
-- left sidebar for node creation and presets
-- central canvas for graph editing and visual panels
-- right inspector for editing selected node or group properties, YAML preview, validation, and publish output
+- desktop layout uses a three-column shell: utility panels, central canvas, and inspector/publish panels
+- small-screen layout collapses into a single-column flow: workspace/auth/project/import panels above the canvas, publish/preview panels below it
+- node and preset creation now live in toolbar dropdowns (`Добавить ноду`, `Добавить правило`) instead of long always-visible side lists
+- the central canvas remains the dominant editing surface on every breakpoint
 
 ## Canvas Behavior
 
@@ -25,6 +26,9 @@
 ## Editor Responsibilities
 
 - maintain graph nodes, edges, and canvas groups
+- expose richer built-in service presets as single ready-to-route rule nodes
+- keep a runtime-only undo/redo history for meaningful project edits
+- expose compact toolbar creation menus for all node kinds and rule presets
 - autosave drafts to local storage
 - import YAML into the canonical JSON model
 - export the current `ConfigProject` as JSON

@@ -1,35 +1,44 @@
-# Environment Reference
+# Переменные окружения
 
-## Required For Local Development
+## Frontend: публичные build-настройки
 
-- `VITE_PUBLIC_APP_URL` - base application URL used to compose publish links
-- `VITE_WORKSPACE_API_BASE` - same-origin workspace and publish route base, defaults to `/api/workspace`
-- `VITE_WORKSPACE_APP_SALT` - public salt used when deriving weak hash-based workspace keys in the browser
+Vite работает из `apps/web` и читает env-файлы **там**. Для разработки скопируйте корневой `.env.dev.example` в `apps/web/.env.local`; для production — `.env.prod.example` в `apps/web/.env.production.local`. Эти значения встраиваются при сборке. Корневой `.env` автоматически не подключён ни к Vite, ни к PowerShell-деплою.
 
-## Runtime Secret Variables
+| Переменная | Значение/умолчание | Назначение |
+| --- | --- | --- |
+| `VITE_PUBLIC_APP_URL` | Browser origin при отсутствии | HTTPS-origin для share/YAML URL, без конечного slash |
+| `VITE_WORKSPACE_API_BASE` | `/api/workspace` | Workspace и связанный publish API; используйте один origin |
+| `VITE_WORKSPACE_APP_SALT` | `clash-workspace-v1` | Публичная соль хеша доступа; фиксируйте для установки |
 
-- `WORKSPACE_BUCKET` - private Object Storage bucket used by the serverless bridge
-- `AWS_ACCESS_KEY_ID` - Object Storage access key for the serverless bridge
-- `AWS_SECRET_ACCESS_KEY` - Object Storage secret key for the serverless bridge
-- `S3_ENDPOINT` - Object Storage endpoint, defaults to Yandex Object Storage
-- `PROXY_URL` - upstream proxy used by the formatter and source inspection path
+`APP_ENV`, `APP_NAME`, `VITE_PUBLIC_APP_TITLE` в старых образцах не управляют текущей логикой. Не добавляйте секреты в `VITE_*`. Наличие образца не означает обязательность переменной. Обычный локальный гостевой редактор запускается без env-файла.
 
-## Deploy Helper Variables
+## Cloud Function: runtime
 
-- `YC_FUNCTION_ID` - target Yandex Cloud Function id for `workspace-bridge`
-- `YC_SERVICE_ACCOUNT_ID` - service account id attached to new function versions
-- `YC_DEPLOY_BUCKET` - Object Storage bucket used to upload the function package before deployment
-- `YC_DEPLOY_OBJECT` - object key for the uploaded package, defaults to `deployments/clash-workspace-bridge-package-py.zip`
-- `YC_GATEWAY_ID` - optional API gateway id to update after function deployment
-- `YC_GATEWAY_SPEC` - optional local path to the gateway OpenAPI spec, defaults to `work/now/clash-site-public.openapi.yaml`
+| Переменная | Обязательность | Назначение |
+| --- | --- | --- |
+| `WORKSPACE_BUCKET` | Да | Закрытый бакет данных |
+| `AWS_ACCESS_KEY_ID` | Да | `key_id` статического ключа S3 runtime-аккаунта |
+| `AWS_SECRET_ACCESS_KEY` | Да, секрет | Secret этого ключа |
+| `S3_ENDPOINT` | Нет | По умолчанию `https://storage.yandexcloud.net` |
+| `PROXY_URL` | Нет, может содержать секрет | HTTP(S) CONNECT или SOCKS5 proxy для upstream; пусто = прямой fetch. Требуется установленный по lock-файлу undici 7.30+ |
+| `PUBLIC_APP_URL` | Нет | Origin приложения, чтобы не направлять запросы к своему formatter через внешний proxy |
 
-## Runtime Behavior Notes
+Прикрепление сервисного аккаунта к функции не заменяет S3-ключи для текущего кода. Ключи остаются на serverless-границе. Запросы inspect/publish refresh могут немедленно загружать upstream-подписки; это сетевые операции из облака.
 
-- published YAML refresh uses the same serverless boundary and storage credentials as workspace persistence
-- explicit publish refresh may fetch upstream provider subscriptions immediately in order to warm the served YAML cache
+## Локальные helpers деплоя
 
-## Notes
+| Переменная | Назначение |
+| --- | --- |
+| `YC_FUNCTION_ID` | Функция workspace-bridge |
+| `YC_SERVICE_ACCOUNT_ID` | Runtime-аккаунт новой версии |
+| `YC_GATEWAY_SERVICE_ACCOUNT_ID` | Отдельный аккаунт gateway: функция + frontend |
+| `YC_FRONTEND_BUCKET` | Бакет собранного frontend |
+| `YC_DEPLOY_BUCKET` | Бакет ZIP-пакетов |
+| `YC_DEPLOY_OBJECT` | Необязательно; по умолчанию `deployments/workspace-bridge.zip` |
+| `YC_GATEWAY_ID` | Существующий Gateway для обновления; на первом деплое функция использует `-SkipGatewayUpdate` |
+| `YC_GATEWAY_SPEC` | Необязательно; по умолчанию `deploy/yandex/gateway.local.yaml` |
+| `YC_FOLDER_ID` | Переменная инструкции для выбора каталога CLI; сами helpers её не читают |
 
-- the browser only needs public Vite-prefixed values
-- the cloud function needs storage credentials, `WORKSPACE_BUCKET`, and optional proxy settings
-- the checked-in `.env` must still be treated as compromised material
+Helpers читают окружение процесса, а не `.env`. `gateway:render` требует Function ID, gateway account ID и frontend bucket. `deploy:workspace-bridge` без `-SkipGatewayUpdate` заранее проверяет наличие Gateway ID и готового spec, затем упаковывает/загружает код и создаёт версию. `-DryRun` не обращается к облаку. Для dry run функции без spec используйте также `-SkipGatewayUpdate`.
+
+Подробности: [деплой](yandex-deploy.md). Прежний локальный `.env` считайте скомпрометированным; в Git он игнорируется, но это не отменяет перевыпуск старых реквизитов.
